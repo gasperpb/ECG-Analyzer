@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECG Analyzer - Sistema de Análise Cardíaca</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 40px;
+        }
+
+        .upload-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px dashed #667eea;
+        }
+
+        .upload-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 20px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-label:hover {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+
+        .file-input-label.dragover {
+            border-color: #667eea;
+            background: #e8ebff;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .button-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .button-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .button-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .button-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .stats-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-box h3 {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-box .value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-box.warning {
+            border-left-color: #ff6b6b;
+        }
+
+        .stat-box.warning .value {
+            color: #ff6b6b;
+        }
+
+        .stat-box.success {
+            border-left-color: #51cf66;
+        }
+
+        .stat-box.success .value {
+            color: #51cf66;
+        }
+
+        .infarction-alert {
+            background: #842029;
+            border: 2px solid #d32f2f;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            color: #ffffff;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .infarction-alert.show {
+            display: block;
+        }
+
+        .infarction-alert h3 {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .infarction-alert.severity-high {
+            background: #b71c1c;
+            border-color: #ff5252;
+        }
+
+        .infarction-alert.severity-critical {
+            background: #7f0000;
+            border-color: #ff0000;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .conduction-alert {
+            background: #e3f2fd;
+            border: 2px solid #1976d2;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            color: #0d47a1;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .conduction-alert.show {
+            display: block;
+        }
+
+        .conduction-alert h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .conduction-alert.normal {
+            background: #e8f5e9;
+            border-color: #388e3c;
+            color: #1b5e20;
+        }
+
+        .conduction-alert.normal h3 {
+            color: #388e3c;
+        }
+
+        .conduction-info {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .conduction-info p {
+            margin: 8px 0;
+            font-size: 0.9em;
+        }
+
+        .conduction-info strong {
+            color: #1976d2;
+        }
+
+        .inflammation-alert {
+            background: #ffebee;
+            border: 2px solid #d32f2f;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            color: #b71c1c;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .inflammation-alert.show {
+            display: block;
+        }
+
+        .inflammation-alert h3 {
+            color: #d32f2f;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .inflammation-alert.pericardite {
+            background: #ffe0b2;
+            border-color: #f57c00;
+            color: #e65100;
+        }
+
+        .inflammation-alert.pericardite h3 {
+            color: #f57c00;
+        }
+
+        .inflammation-alert.miocardite {
+            background: #f3e5f5;
+            border-color: #7b1fa2;
+            color: #4a148c;
+        }
+
+        .inflammation-alert.miocardite h3 {
+            color: #7b1fa2;
+        }
+
+        .inflammation-info {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .inflammation-info p {
+            margin: 8px 0;
+            font-size: 0.9em;
+        }
+
+        .inflammation-info strong {
+            color: #d32f2f;
+        }
+
+        .drug-alert {
+            background: #e3f2fd;
+            border: 2px solid #1976d2;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            color: #0d47a1;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .drug-alert.show {
+            display: block;
+        }
+
+        .drug-alert h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .drug-alert.digoxina {
+            background: #fff3e0;
+            border-color: #f57f17;
+            color: #e65100;
+        }
+
+        .drug-alert.digoxina h3 {
+            color: #f57f17;
+        }
+
+        .drug-alert.antiarritimico {
+            background: #f0f4c3;
+            border-color: #827717;
+            color: #33691e;
+        }
+
+        .drug-alert.antiarritimico h3 {
+            color: #827717;
+        }
+
+        .drug-info {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .drug-info p {
+            margin: 8px 0;
+            font-size: 0.9em;
+        }
+
+        .drug-info strong {
+            color: #1976d2;
+        }
+
+        .chart-section {
+            grid-column: 1 / -1;
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        .chart-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        #ecgChart {
+            max-height: 400px;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .status-message.loading {
+            background: #cce5ff;
+            color: #004085;
+            border: 1px solid #b8daff;
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .anomaly-info {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            color: #856404;
+            display: none;
+        }
+
+        .anomaly-info.show {
+            display: block;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #ddd;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-text {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 10px;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>❤️ ECG Analyzer</h1>
+            <p>Sistema Inteligente de Análise de Eletrocardiograma</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <!-- Upload Section -->
+            <div class="upload-section">
+                <h2>📤 Carregar Arquivo</h2>
+
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab-button active" onclick="switchTab('upload')">Upload</button>
+                    <button class="tab-button" onclick="switchTab('image')">Imagem ECG</button>
+                    <button class="tab-button" onclick="switchTab('simulate')">Simular</button>
+                </div>
+
+                <!-- Upload Tab -->
+                <div id="uploadTab">
+                    <div class="file-input-wrapper">
+                        <label for="fileInput" class="file-input-label" id="dropZone">
+                            <div>
+                                <p>📁 Arraste aqui ou clique para selecionar</p>
+                                <p class="info-text">Formato: CSV (timestamp, voltagem)</p>
+                            </div>
+                        </label>
+                        <input type="file" id="fileInput" accept=".csv" />
+                    </div>
+                    <button class="button button-primary" onclick="uploadFile()">Analisar Arquivo</button>
+                </div>
+
+                <!-- Image Tab -->
+                <div id="imageTab" style="display: none;">
+                    <div class="file-input-wrapper">
+                        <label for="imageInput" class="file-input-label" id="dropZoneImage">
+                            <div>
+                                <p>🖼️ Arraste a imagem ou clique para selecionar</p>
+                                <p class="info-text">Formatos: PNG, JPG, JPEG, BMP, GIF</p>
+                            </div>
+                        </label>
+                        <input type="file" id="imageInput" accept=".png,.jpg,.jpeg,.bmp,.gif" />
+                    </div>
+                    <button class="button button-primary" onclick="uploadImage()">Analisar Imagem</button>
+                </div>
+
+                <!-- Simulate Tab -->
+                <div id="simulateTab" style="display: none;">
+                    <div>
+                        <label for="durationInput">Duração (segundos):</label>
+                        <input type="number" id="durationInput" min="5" max="60" value="10" 
+                               style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    <button class="button button-secondary" onclick="generateSimulated()">Gerar Dados Simulados</button>
+                </div>
+
+                <!-- Status Messages -->
+                <div id="statusMessage" class="status-message"></div>
+
+                <!-- Results Stats -->
+                <div class="stats-section" id="statsSection" style="display: none;">
+                    <div class="stat-box" id="bpmBox">
+                        <h3>BPM</h3>
+                        <div class="value" id="bpmValue">--</div>
+                    </div>
+                    <div class="stat-box">
+                        <h3>Batidas Detectadas</h3>
+                        <div class="value" id="peakValue">--</div>
+                    </div>
+                    <div class="stat-box">
+                        <h3>Duração</h3>
+                        <div class="value" id="durationValue">--</div>
+                    </div>
+                    <div class="stat-box">
+                        <h3>Voltagem Máx</h3>
+                        <div class="value" id="maxVValue">--</div>
+                    </div>
+                </div>
+
+                <!-- Anomaly Info -->
+                <div class="anomaly-info" id="anomalyInfo">
+                    <strong>⚠️ Alerta:</strong> <span id="anomalyText"></span>
+                </div>
+
+                <!-- Infarction Alert -->
+                <div class="infarction-alert" id="infarctionAlert">
+                    <h3>🚨 ALERTA DE INFARTO DETECTADO 🚨</h3>
+                    <p id="infarctionText"></p>
+                    <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 5px;">
+                        <p><strong>Elevação ST:</strong> <span id="stElevationValue">--</span> mV</p>
+                        <p><strong>Severidade:</strong> <span id="severityText">--</span></p>
+                        <p style="margin-top: 10px; color: #ffeb3b;"><strong>⚠️ PROCURE EMERGÊNCIA IMEDIATAMENTE!</strong></p>
+                    </div>
+                </div>
+
+                <!-- Conduction Disorder Alert -->
+                <div class="conduction-alert" id="conductionAlert">
+                    <h3>⚡ Condução Elétrica</h3>
+                    <p id="conductionText"></p>
+                    <div class="conduction-info">
+                        <p><strong>Intervalo PR:</strong> <span id="prIntervalValue">--</span> ms (Normal: 120-200ms)</p>
+                        <p><strong>Largura QRS:</strong> <span id="qrsWidthValue">--</span> ms (Normal: 80-120ms)</p>
+                        <p><strong>Tipo de Bloqueio de Ramo:</strong> <span id="branchBlockValue">--</span></p>
+                        <p><strong>Tipo de Bloqueio AV:</strong> <span id="avBlockValue">--</span></p>
+                    </div>
+                </div>
+
+                <!-- Inflammation Alert -->
+                <div class="inflammation-alert" id="inflammationAlert">
+                    <h3>🔴 Inflamação Cardíaca Detectada</h3>
+                    <p id="inflammationText"></p>
+                    <div class="inflammation-info">
+                        <p><strong>Tipo:</strong> <span id="inflammationTypeValue">--</span></p>
+                        <p><strong>Elevação ST Difusa:</strong> <span id="diffuseSTValue">--</span> mV</p>
+                        <p><strong>Descrição:</strong> <span id="inflammationDetailsValue">--</span></p>
+                    </div>
+                </div>
+
+                <!-- Drug Effects Alert -->
+                <div class="drug-alert" id="drugAlert">
+                    <h3>💊 Efeito de Medicamentos Detectado</h3>
+                    <p id="drugText"></p>
+                    <div class="drug-info">
+                        <p><strong>Medicamento Suspeito:</strong> <span id="drugTypeValue">--</span></p>
+                        <p><strong>Depressão ST:</strong> <span id="stDepressionValue">--</span> mV</p>
+                        <p><strong>Intervalo QT:</strong> <span id="qtIntervalValue">--</span> ms</p>
+                        <p><strong>Padrão ECG:</strong> <span id="drugPatternValue">--</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Display (Right Column) -->
+            <div>
+                <h2 style="margin-bottom: 20px; color: #333;">📊 Resumo Estatístico</h2>
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="color: #667eea; margin-bottom: 10px;">Estatísticas do Sinal</h3>
+                        <p><strong>Voltagem Mín:</strong> <span id="minVValue">--</span> mV</p>
+                        <p><strong>Voltagem Máx:</strong> <span id="maxVValue2">--</span> mV</p>
+                        <p><strong>Voltagem Média:</strong> <span id="avgVValue">--</span> mV</p>
+                    </div>
+                    <div>
+                        <h3 style="color: #667eea; margin-bottom: 10px;">Status Cardíaco</h3>
+                        <div id="statusBox" style="padding: 15px; background: #d4edda; border-radius: 5px; color: #155724;">
+                            <p id="statusText">Nenhum dado carregado</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="content" style="grid-template-columns: 1fr;">
+            <div class="chart-section">
+                <h2>📈 Gráfico ECG</h2>
+                <canvas id="ecgChart"></canvas>
+                <p class="info-text">Azul: sinal de ECG | Vermelho: picos detectados</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>🏥 ECG Analyzer v1.0.0 | Desenvolvido por Achillesdev em Java + Spring Boot + Chart.js</p>
+        </div>
+    </div>
+
+    <script>
+        let ecgChart = null;
+        const API_BASE = '/api/ecg';
+
+        // Drag and Drop for CSV
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            fileInput.files = e.dataTransfer.files;
+        });
+
+        // Drag and Drop for Images
+        const dropZoneImage = document.getElementById('dropZoneImage');
+        const imageInput = document.getElementById('imageInput');
+
+        dropZoneImage.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZoneImage.classList.add('dragover');
+        });
+
+        dropZoneImage.addEventListener('dragleave', () => {
+            dropZoneImage.classList.remove('dragover');
+        });
+
+        dropZoneImage.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZoneImage.classList.remove('dragover');
+            imageInput.files = e.dataTransfer.files;
+        });
+
+        // Tab switching
+        function switchTab(tab) {
+            document.getElementById('uploadTab').style.display = tab === 'upload' ? 'block' : 'none';
+            document.getElementById('imageTab').style.display = tab === 'image' ? 'block' : 'none';
+            document.getElementById('simulateTab').style.display = tab === 'simulate' ? 'block' : 'none';
+            
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // Upload CSV file
+        function uploadFile() {
+            const file = fileInput.files[0];
+            if (!file) {
+                showStatus('Por favor, selecione um arquivo', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            showStatus('Analisando arquivo...', 'loading');
+
+            fetch(`${API_BASE}/analyze`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayResults(data);
+                    showStatus('Análise concluída com sucesso!', 'success');
+                } else {
+                    showStatus('Erro: ' + data.error, 'error');
+                }
+            })
+            .catch(error => {
+                showStatus('Erro na requisição: ' + error.message, 'error');
+                console.error('Erro:', error);
+            });
+        }
+
+        // Upload Image file
+        function uploadImage() {
+            const file = imageInput.files[0];
+            if (!file) {
+                showStatus('Por favor, selecione uma imagem', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            showStatus('Processando imagem...', 'loading');
+
+            fetch(`${API_BASE}/analyze-image`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayResults(data);
+                    showStatus('Imagem processada com sucesso! ' + data.message, 'success');
+                } else {
+                    showStatus('Erro: ' + data.error, 'error');
+                }
+            })
+            .catch(error => {
+                showStatus('Erro na requisição: ' + error.message, 'error');
+                console.error('Erro:', error);
+            });
+        }
+
+        // Generate simulated data
+        function generateSimulated() {
+            const duration = document.getElementById('durationInput').value;
+            showStatus('Gerando dados simulados...', 'loading');
+
+            fetch(`${API_BASE}/simulate?duration=${duration}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayResults(data);
+                        showStatus('Dados simulados gerados com sucesso!', 'success');
+                    } else {
+                        showStatus('Erro: ' + data.error, 'error');
+                    }
+                })
+                .catch(error => {
+                    showStatus('Erro na requisição: ' + error.message, 'error');
+                });
+        }
+
+        // Display results
+        function displayResults(data) {
+            // Update stats
+            document.getElementById('statsSection').style.display = 'grid';
+            document.getElementById('bpmValue').textContent = data.bpm.toFixed(1);
+            document.getElementById('peakValue').textContent = data.peakCount;
+            document.getElementById('durationValue').textContent = data.duration.toFixed(2) + 's';
+            document.getElementById('maxVValue').textContent = data.maxVoltage.toFixed(2) + ' mV';
+            document.getElementById('minVValue').textContent = data.minVoltage.toFixed(2) + ' mV';
+            document.getElementById('maxVValue2').textContent = data.maxVoltage.toFixed(2) + ' mV';
+            document.getElementById('avgVValue').textContent = data.avgVoltage.toFixed(3) + ' mV';
+
+            // Handle Infarction Detection
+            if (data.hasInfarction) {
+                const infarctionAlert = document.getElementById('infarctionAlert');
+                infarctionAlert.classList.add('show');
+                
+                // Set severity class
+                infarctionAlert.classList.remove('severity-high', 'severity-critical');
+                if (data.infarctionSeverity >= 4) {
+                    infarctionAlert.classList.add('severity-critical');
+                } else if (data.infarctionSeverity >= 3) {
+                    infarctionAlert.classList.add('severity-high');
+                }
+                
+                document.getElementById('infarctionText').textContent = data.infarctionDescription;
+                document.getElementById('stElevationValue').textContent = data.stElevation.toFixed(3);
+                
+                const severityText = data.infarctionSeverity >= 4 ? 'CRÍTICA' : 
+                                     data.infarctionSeverity >= 3 ? 'ALTA' : 'MODERADA';
+                document.getElementById('severityText').textContent = severityText;
+                
+                // Also mark as anomalous
+                document.getElementById('statusBox').style.background = '#7f0000';
+                document.getElementById('statusBox').style.color = '#ffffff';
+            } else {
+                document.getElementById('infarctionAlert').classList.remove('show');
+            }
+
+            // Handle Conduction Disorders
+            const conductionAlert = document.getElementById('conductionAlert');
+            if (data.hasConductionDisorder) {
+                conductionAlert.classList.add('show');
+                conductionAlert.classList.remove('normal');
+            } else {
+                conductionAlert.classList.remove('show');
+                conductionAlert.classList.add('normal');
+                conductionAlert.classList.add('show');
+            }
+            
+            document.getElementById('conductionText').textContent = data.conductionDescription;
+            document.getElementById('prIntervalValue').textContent = data.prInterval.toFixed(0);
+            document.getElementById('qrsWidthValue').textContent = data.qrsWidth.toFixed(0);
+            document.getElementById('branchBlockValue').textContent = data.branchBlockType || 'Nenhum';
+            document.getElementById('avBlockValue').textContent = data.avBlockType || 'Nenhum';
+
+            // Handle Inflammation Detection
+            const inflammationAlert = document.getElementById('inflammationAlert');
+            if (data.hasInflammation) {
+                inflammationAlert.classList.add('show');
+                inflammationAlert.classList.remove('pericardite', 'miocardite');
+                
+                // Set inflammation type class
+                if (data.inflammationType === 'Pericardite') {
+                    inflammationAlert.classList.add('pericardite');
+                } else if (data.inflammationType === 'Miocardite') {
+                    inflammationAlert.classList.add('miocardite');
+                }
+                
+                document.getElementById('inflammationText').textContent = data.inflammationDescription;
+                document.getElementById('inflammationTypeValue').textContent = data.inflammationType;
+                document.getElementById('diffuseSTValue').textContent = data.diffuseSTElevation.toFixed(3);
+                
+                // Provide detailed description
+                let details = '';
+                if (data.inflammationType === 'Pericardite') {
+                    details = 'Elevação de ST difusa e generalizada com possível depressão de PR';
+                } else if (data.inflammationType === 'Miocardite') {
+                    details = 'Alterações difusas com inversão de onda T e mudanças de ST';
+                }
+                document.getElementById('inflammationDetailsValue').textContent = details;
+            } else {
+                inflammationAlert.classList.remove('show');
+            }
+
+            // Handle Drug Effects Detection
+            const drugAlert = document.getElementById('drugAlert');
+            if (data.hasDrugEffect) {
+                drugAlert.classList.add('show');
+                drugAlert.classList.remove('digoxina', 'antiarritimico');
+                
+                // Set drug type class
+                if (data.drugType === 'Digoxina') {
+                    drugAlert.classList.add('digoxina');
+                } else if (data.drugType === 'Antiarrítmico') {
+                    drugAlert.classList.add('antiarritimico');
+                }
+                
+                document.getElementById('drugText').textContent = data.drugEffectDescription;
+                document.getElementById('drugTypeValue').textContent = data.drugType;
+                document.getElementById('stDepressionValue').textContent = data.stDepression.toFixed(3);
+                document.getElementById('qtIntervalValue').textContent = data.qtInterval.toFixed(0);
+                
+                // Provide pattern description
+                let pattern = '';
+                if (data.drugType === 'Digoxina') {
+                    pattern = 'Depressão ST em "colher" + Intervalo QT encurtado + Ondas T bifásicas';
+                } else if (data.drugType === 'Antiarrítmico') {
+                    pattern = 'QRS alargado + Intervalo QT prolongado + Possível elevação de ST';
+                }
+                document.getElementById('drugPatternValue').textContent = pattern;
+            } else {
+                drugAlert.classList.remove('show');
+            }
+
+            // Update status
+            const bpmBox = document.getElementById('bpmBox');
+            if (data.isAnomalous) {
+                bpmBox.classList.add('warning');
+                if (!data.hasInfarction) {
+                    document.getElementById('statusBox').style.background = '#f8d7da';
+                    document.getElementById('statusBox').style.color = '#721c24';
+                }
+                document.getElementById('anomalyInfo').classList.add('show');
+                document.getElementById('anomalyText').textContent = data.anomalyDescription;
+            } else {
+                bpmBox.classList.remove('warning');
+                bpmBox.classList.add('success');
+                document.getElementById('statusBox').style.background = '#d4edda';
+                document.getElementById('statusBox').style.color = '#155724';
+                document.getElementById('anomalyInfo').classList.remove('show');
+            }
+
+            document.getElementById('statusText').textContent = data.hasInfarction ? 
+                data.infarctionDescription : data.anomalyDescription;
+
+            // Draw chart
+            drawChart(data);
+        }
+
+        // Draw ECG Chart
+        function drawChart(data) {
+            const ctx = document.getElementById('ecgChart').getContext('2d');
+
+            // Create dataset
+            const datasets = [];
+            
+            // ECG signal
+            const ecgData = data.voltages.map((v, i) => ({
+                x: i,
+                y: v
+            }));
+
+            datasets.push({
+                label: 'Sinal ECG',
+                data: ecgData,
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0,
+                pointRadius: 0,
+                pointHoverRadius: 0
+            });
+
+            // Peaks
+            if (data.peakIndices && data.peakIndices.length > 0) {
+                const peaksData = data.peakIndices.map(idx => ({
+                    x: idx,
+                    y: data.voltages[idx]
+                }));
+
+                datasets.push({
+                    label: 'Picos Detectados',
+                    data: peaksData,
+                    borderColor: '#ff6b6b',
+                    backgroundColor: '#ff6b6b',
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    showLine: false
+                });
+            }
+
+            if (ecgChart) {
+                ecgChart.destroy();
+            }
+
+            ecgChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Amostras'
+                            },
+                            display: true
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Voltagem (mV)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message ${type}`;
+
+            if (type === 'loading') {
+                statusDiv.innerHTML = `<span class="loading-spinner"></span>${message}`;
+            }
+
+            if (type !== 'loading') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Check API health on page load
+        window.addEventListener('load', () => {
+            fetch(`${API_BASE}/health`)
+                .then(r => r.json())
+                .then(data => console.log('API Status:', data))
+                .catch(e => console.error('API offline:', e));
+        });
+    </script>
+</body>
+</html>

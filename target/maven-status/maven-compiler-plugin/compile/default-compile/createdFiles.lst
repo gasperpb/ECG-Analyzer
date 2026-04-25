@@ -1,0 +1,8 @@
+com\ecg\service\ECGReader.class
+com\ecg\service\ECGAnalyzer.class
+com\ecg\config\WebConfig.class
+com\ecg\ECGApplication.class
+com\ecg\model\ECGData.class
+com\ecg\controller\ECGController.class
+com\ecg\service\ImageProcessor.class
+com\ecg\controller\ViewController.class
