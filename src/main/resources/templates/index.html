@@ -647,6 +647,24 @@
                         <p><strong>Padrão ECG:</strong> <span id="drugPatternValue">--</span></p>
                     </div>
                 </div>
+
+                <!-- Myocardial Scar Alert -->
+                <div class="drug-alert" id="scarAlert" style="background: #f3e5f5; border-color: #7b1fa2; color: #4a148c;">
+                    <h3 style="color: #7b1fa2;">🔴 Cicatriz Miocárdica</h3>
+                    <p id="scarText"></p>
+                </div>
+
+                <!-- Ventricular Aneurysm Alert -->
+                <div class="drug-alert" id="aneurysmAlert" style="background: #ffebee; border-color: #c62828; color: #b71c1c;">
+                    <h3 style="color: #c62828;">⚠️ Aneurisma Ventricular</h3>
+                    <p id="aneurysmText"></p>
+                </div>
+
+                <!-- Post-Infarction Arrhythmia Alert -->
+                <div class="drug-alert" id="arrhythmiaAlert" style="background: #fff3e0; border-color: #e65100; color: #e65100;">
+                    <h3 style="color: #e65100;">⚡ Arritmia Pós-Infarto</h3>
+                    <p id="arrhythmiaText"></p>
+                </div>
             </div>
 
             <!-- Stats Display (Right Column) -->
@@ -937,6 +955,33 @@
                 drugAlert.classList.remove('show');
             }
 
+            // Handle Myocardial Scar Detection
+            const scarAlert = document.getElementById('scarAlert');
+            if (data.hasMyocardialScar) {
+                scarAlert.classList.add('show');
+                document.getElementById('scarText').textContent = data.myocardialScarDescription;
+            } else {
+                scarAlert.classList.remove('show');
+            }
+
+            // Handle Ventricular Aneurysm Detection
+            const aneurysmAlert = document.getElementById('aneurysmAlert');
+            if (data.hasVentricularAneurysm) {
+                aneurysmAlert.classList.add('show');
+                document.getElementById('aneurysmText').textContent = data.ventricularAneurysmDescription;
+            } else {
+                aneurysmAlert.classList.remove('show');
+            }
+
+            // Handle Post-Infarction Arrhythmia Detection
+            const arrhythmiaAlert = document.getElementById('arrhythmiaAlert');
+            if (data.hasPostInfarctionArrhythmia) {
+                arrhythmiaAlert.classList.add('show');
+                document.getElementById('arrhythmiaText').textContent = data.postInfarctionArrhythmiaDescription;
+            } else {
+                arrhythmiaAlert.classList.remove('show');
+            }
+
             // Update status
             const bpmBox = document.getElementById('bpmBox');
             if (data.isAnomalous) {
@@ -1061,6 +1106,11 @@
 
         // Check API health on page load
         window.addEventListener('load', () => {
+            // Set image tab as default on page load
+            const imageTabButton = document.querySelectorAll('.tab-button')[1];
+            switchTab('image');
+            imageTabButton.classList.add('active');
+            
             fetch(`${API_BASE}/health`)
                 .then(r => r.json())
                 .then(data => console.log('API Status:', data))

@@ -32,6 +32,12 @@ public class ECGAnalyzer {
     private String drugType;
     private double stDepression;
     private double qtInterval;
+    private boolean hasMyocardialScar;
+    private String myocardialScarDescription;
+    private boolean hasVentricularAneurysm;
+    private String ventricularAneurysmDescription;
+    private boolean hasPostInfarctionArrhythmia;
+    private String postInfarctionArrhythmiaDescription;
     
     public ECGAnalyzer(ECGData data) {
         this.data = data;
@@ -57,6 +63,12 @@ public class ECGAnalyzer {
         this.drugType = "";
         this.stDepression = 0;
         this.qtInterval = 0;
+        this.hasMyocardialScar = false;
+        this.myocardialScarDescription = "";
+        this.hasVentricularAneurysm = false;
+        this.ventricularAneurysmDescription = "";
+        this.hasPostInfarctionArrhythmia = false;
+        this.postInfarctionArrhythmiaDescription = "";
         analyze();
     }
     
@@ -71,6 +83,9 @@ public class ECGAnalyzer {
         detectInflammation();
         detectDrugEffects();
         detectInfarction();
+        detectMyocardialScar();
+        detectVentricularAneurysm();
+        detectPostInfarctionArrhythmia();
         detectAnomalies();
     }
     
@@ -812,5 +827,328 @@ public class ECGAnalyzer {
     
     public double getQTInterval() {
         return qtInterval;
+    }
+    
+    private void detectMyocardialScar() {
+        List<Double> voltages = data.getVoltages();
+        
+        if (peakIndices.size() < 3 || voltages.size() < 20) {
+            hasMyocardialScar = false;
+            myocardialScarDescription = "";
+            return;
+        }
+        
+        StringBuilder report = new StringBuilder();
+        int scarIndicators = 0;
+        double avgVoltage = data.getAverageVoltage();
+        double voltageRange = data.getMaxVoltage() - data.getMinVoltage();
+        
+        // Cicatriz miocárdica: padrão de ondas Q permanentes e duradouras
+        // Q wave permanente > 0.04 segundos em amplitude > 25% do complexo QRS
+        double permanentQWaveCount = 0;
+        double qWaveDepthSum = 0;
+        
+        for (int i = 1; i < peakIndices.size() - 1; i++) {
+            int peakIndex = peakIndices.get(i);
+            int qStart = Math.max(0, peakIndex - 12);
+            int qEnd = peakIndex;
+            
+            double maxQDepth = 0;
+            for (int j = qStart; j < qEnd; j++) {
+                double qDepth = Math.min(voltages.get(j), 0);
+                if (qDepth < maxQDepth) {
+                    maxQDepth = qDepth;
+                }
+            }
+            
+            // Onda Q profunda (indicador de cicatriz)
+            if (maxQDepth < -0.3 && Math.abs(maxQDepth) > voltageRange * 0.25) {
+                permanentQWaveCount++;
+                qWaveDepthSum += Math.abs(maxQDepth);
+                scarIndicators++;
+            }
+        }
+        
+        // Cicatriz: redução de voltagem generalizada em região específica (voltagem residual baixa)
+        double lowVoltageZones = 0;
+        for (int i = 1; i < peakIndices.size() - 1; i++) {
+            int peakIndex = peakIndices.get(i);
+            int afterPeakStart = peakIndex + 3;
+            int afterPeakEnd = Math.min(afterPeakStart + 15, peakIndices.get(i + 1));
+            
+            double maxVoltageInZone = Double.MIN_VALUE;
+            for (int j = afterPeakStart; j < afterPeakEnd && j < voltages.size(); j++) {
+                maxVoltageInZone = Math.max(maxVoltageInZone, Math.abs(voltages.get(j)));
+            }
+            
+            // Amplitude residual muito baixa (sinal de tecido cicatricial)
+            if (maxVoltageInZone < voltageRange * 0.15) {
+                lowVoltageZones++;
+            }
+        }
+        
+        if (lowVoltageZones > peakIndices.size() * 0.4) {
+            scarIndicators++;
+        }
+        
+        // Segmento ST anormal persistente (indicador de remodelação pós-infarto)
+        double abnormalSTCount = 0;
+        for (int i = 1; i < peakIndices.size() - 1; i++) {
+            int peakIndex = peakIndices.get(i);
+            int stStart = peakIndex + 5;
+            int stEnd = Math.min(stStart + 8, peakIndices.get(i + 1));
+            
+            if (stStart < voltages.size()) {
+                double stVariation = 0;
+                for (int j = stStart + 1; j < stEnd && j < voltages.size(); j++) {
+                    stVariation += Math.abs(voltages.get(j) - voltages.get(j - 1));
+                }
+                
+                // ST anormalmente irregular
+                if (stVariation > voltageRange * 0.3) {
+                    abnormalSTCount++;
+                }
+            }
+        }
+        
+        if (abnormalSTCount > 2) {
+            scarIndicators++;
+        }
+        
+        // Determina se há cicatriz miocárdica
+        if (scarIndicators >= 2 && permanentQWaveCount > 0) {
+            hasMyocardialScar = true;
+            report.append("🔸 Cicatriz Miocárdica Detectada | ");
+            report.append("Ondas Q permanentes em ").append((int)permanentQWaveCount).append(" complexos | ");
+            report.append("Padrão indicativo de infarto prévio com remodelação miocárdica");
+            myocardialScarDescription = report.toString();
+            isAnomalous = true;
+        } else {
+            hasMyocardialScar = false;
+            myocardialScarDescription = "";
+        }
+    }
+    
+    private void detectVentricularAneurysm() {
+        List<Double> voltages = data.getVoltages();
+        
+        if (peakIndices.size() < 3 || voltages.size() < 20) {
+            hasVentricularAneurysm = false;
+            ventricularAneurysmDescription = "";
+            return;
+        }
+        
+        StringBuilder report = new StringBuilder();
+        int aneurysmIndicators = 0;
+        double voltageRange = data.getMaxVoltage() - data.getMinVoltage();
+        
+        // Aneurisma ventricular: elevação ST persistente + depressão recíproca
+        // Elevação ST localizada prolongada (não resolve rapidamente)
+        double persistentSTElevation = 0;
+        double maxPersistentST = 0;
+        int persistentSTZones = 0;
+        
+        for (int i = 1; i < peakIndices.size() - 1; i++) {
+            int peakIndex = peakIndices.get(i);
+            int stStart = peakIndex + 3;
+            int stEnd = Math.min(stStart + 10, peakIndices.get(i + 1));
+            
+            if (stStart < voltages.size()) {
+                double baselineVoltage = (voltages.get(peakIndex - 2) + voltages.get(peakIndex)) / 2.0;
+                
+                int stElevatedCount = 0;
+                for (int j = stStart; j < stEnd && j < voltages.size(); j++) {
+                    double elevation = voltages.get(j) - baselineVoltage;
+                    if (elevation > 0.5) {
+                        stElevatedCount++;
+                        persistentSTElevation += elevation;
+                        maxPersistentST = Math.max(maxPersistentST, elevation);
+                    }
+                }
+                
+                if (stElevatedCount > 5) {
+                    persistentSTZones++;
+                    aneurysmIndicators++;
+                }
+            }
+        }
+        
+        // Ondas T invertidas em zona com elevação ST (padrão típico de aneurisma)
+        double invertedTInAneurysm = 0;
+        for (int i = 1; i < peakIndices.size() - 1; i++) {
+            int peakIndex = peakIndices.get(i);
+            int stStart = peakIndex + 3;
+            int stEnd = Math.min(stStart + 10, peakIndices.get(i + 1));
+            int tWaveStart = stEnd;
+            int tWaveEnd = Math.min(tWaveStart + 12, peakIndices.get(i + 1));
+            
+            // Verifica se há elevação ST
+            double baselineVoltage = (voltages.get(peakIndex - 2) + voltages.get(peakIndex)) / 2.0;
+            boolean hasSTElevation = false;
+            for (int j = stStart; j < stEnd && j < voltages.size(); j++) {
+                if ((voltages.get(j) - baselineVoltage) > 0.3) {
+                    hasSTElevation = true;
+                    break;
+                }
+            }
+            
+            // Se há elevação ST, verifica onda T invertida
+            if (hasSTElevation && tWaveStart < voltages.size()) {
+                for (int j = tWaveStart; j < tWaveEnd && j < voltages.size(); j++) {
+                    if (voltages.get(j) < baselineVoltage - 0.4) {
+                        invertedTInAneurysm++;
+                    }
+                }
+            }
+        }
+        
+        if (invertedTInAneurysm > 5) {
+            aneurysmIndicators++;
+        }
+        
+        // Depressão ST recíproca (oposto da elevação)
+        double reciprocalDepressionCount = 0;
+        for (int i = 1; i < peakIndices.size() - 1; i++) {
+            int peakIndex = peakIndices.get(i);
+            int stStart = peakIndex + 3;
+            int stEnd = Math.min(stStart + 8, peakIndices.get(i + 1));
+            
+            if (stStart < voltages.size()) {
+                double baselineVoltage = (voltages.get(peakIndex - 2) + voltages.get(peakIndex)) / 2.0;
+                
+                for (int j = stStart; j < stEnd && j < voltages.size(); j++) {
+                    double depression = baselineVoltage - voltages.get(j);
+                    if (depression > 0.3) {
+                        reciprocalDepressionCount++;
+                    }
+                }
+            }
+        }
+        
+        if (reciprocalDepressionCount > 8) {
+            aneurysmIndicators++;
+        }
+        
+        // Determina se há aneurisma ventricular
+        if (aneurysmIndicators >= 2 && persistentSTZones > 0) {
+            hasVentricularAneurysm = true;
+            report.append("🔸 Aneurisma Ventricular Suspeito | ");
+            report.append("Elevação ST persistente em ").append(persistentSTZones).append(" zonas (até ").append(String.format("%.2f", maxPersistentST)).append("mV) | ");
+            report.append("Possível deformação da parede ventricular");
+            ventricularAneurysmDescription = report.toString();
+            isAnomalous = true;
+        } else {
+            hasVentricularAneurysm = false;
+            ventricularAneurysmDescription = "";
+        }
+    }
+    
+    private void detectPostInfarctionArrhythmia() {
+        List<Double> intervals = new ArrayList<>();
+        
+        if (peakIndices.size() < 5) {
+            hasPostInfarctionArrhythmia = false;
+            postInfarctionArrhythmiaDescription = "";
+            return;
+        }
+        
+        // Calcula intervalos entre picos
+        for (int i = 1; i < peakIndices.size(); i++) {
+            int samples = peakIndices.get(i) - peakIndices.get(i - 1);
+            intervals.add(samples / data.getSamplingRate() * 1000);
+        }
+        
+        StringBuilder report = new StringBuilder();
+        int arrhythmiaIndicators = 0;
+        
+        // 1. Variabilidade anormal dos intervalos (indicador de arritmia pós-infarto)
+        double meanInterval = intervals.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+        double variance = intervals.stream()
+            .mapToDouble(i -> Math.pow(i - meanInterval, 2))
+            .average().orElse(0);
+        double stdDev = Math.sqrt(variance);
+        double variationCoeff = (stdDev / meanInterval) * 100;
+        
+        if (variationCoeff > 25 && hasInfarction) {
+            report.append("⚠️ Arritmia Pós-Infarto: Variabilidade alta nos intervalos (").append(String.format("%.1f", variationCoeff)).append("%)");
+            arrhythmiaIndicators++;
+        } else if (variationCoeff > 30) {
+            report.append("⚠️ Arritmia: Variabilidade muito alta nos intervalos (").append(String.format("%.1f", variationCoeff)).append("%)");
+            arrhythmiaIndicators++;
+        }
+        
+        // 2. Pausa sinusal (intervalo muito longo entre dois picos)
+        double maxInterval = intervals.stream().mapToDouble(Double::doubleValue).max().orElse(0);
+        double pauseThreshold = meanInterval * 1.6;
+        
+        if (maxInterval > pauseThreshold && hasInfarction) {
+            report.append(" | Pausa sinusal detectada após infarto");
+            arrhythmiaIndicators++;
+        }
+        
+        // 3. Batidas ectópicas (intervalo muito curto seguido de pausa)
+        int ectopicBeats = 0;
+        for (int i = 1; i < intervals.size() - 1; i++) {
+            double currentInterval = intervals.get(i);
+            double nextInterval = intervals.get(i + 1);
+            
+            // Intervalo curto (prematura) seguido de pausa compensatória
+            if (currentInterval < meanInterval * 0.6 && nextInterval > meanInterval * 1.2) {
+                ectopicBeats++;
+            }
+        }
+        
+        if (ectopicBeats > 2) {
+            if (report.length() > 0) report.append(" | ");
+            report.append("Batidas ectópicas detectadas (").append(ectopicBeats).append(") - comum em pós-infarto");
+            arrhythmiaIndicators++;
+        }
+        
+        // 4. Fibrilação atrial pós-infarto (ausência de ritmo regular + frequência alta)
+        double irregularityIndex = 0;
+        for (int i = 1; i < intervals.size(); i++) {
+            irregularityIndex += Math.abs(intervals.get(i) - intervals.get(i - 1));
+        }
+        irregularityIndex /= intervals.size();
+        
+        if (irregularityIndex > meanInterval * 0.4 && bpm > 100 && hasInfarction) {
+            if (report.length() > 0) report.append(" | ");
+            report.append("Padrão sugestivo de fibrilação atrial pós-infarto");
+            arrhythmiaIndicators++;
+        }
+        
+        // Determina se há arritmia pós-infarto
+        if (arrhythmiaIndicators > 0 && (hasInfarction || hasMyocardialScar)) {
+            hasPostInfarctionArrhythmia = true;
+            postInfarctionArrhythmiaDescription = report.toString();
+            isAnomalous = true;
+        } else {
+            hasPostInfarctionArrhythmia = false;
+            postInfarctionArrhythmiaDescription = "";
+        }
+    }
+    
+    public boolean hasMyocardialScar() {
+        return hasMyocardialScar;
+    }
+    
+    public String getMyocardialScarDescription() {
+        return myocardialScarDescription;
+    }
+    
+    public boolean hasVentricularAneurysm() {
+        return hasVentricularAneurysm;
+    }
+    
+    public String getVentricularAneurysmDescription() {
+        return ventricularAneurysmDescription;
+    }
+    
+    public boolean hasPostInfarctionArrhythmia() {
+        return hasPostInfarctionArrhythmia;
+    }
+    
+    public String getPostInfarctionArrhythmiaDescription() {
+        return postInfarctionArrhythmiaDescription;
     }
 }

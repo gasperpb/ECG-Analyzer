@@ -71,7 +71,14 @@ public class ECGController {
             response.put("drugEffectDescription", analyzer.getDrugEffectDescription());
             response.put("drugType", analyzer.getDrugType());
             response.put("stDepression", analyzer.getSTDepression());
-            response.put("qtInterval", analyzer.getQTInterval());            response.put("voltages", data.getVoltages());
+            response.put("qtInterval", analyzer.getQTInterval());
+            response.put("hasMyocardialScar", analyzer.hasMyocardialScar());
+            response.put("myocardialScarDescription", analyzer.getMyocardialScarDescription());
+            response.put("hasVentricularAneurysm", analyzer.hasVentricularAneurysm());
+            response.put("ventricularAneurysmDescription", analyzer.getVentricularAneurysmDescription());
+            response.put("hasPostInfarctionArrhythmia", analyzer.hasPostInfarctionArrhythmia());
+            response.put("postInfarctionArrhythmiaDescription", analyzer.getPostInfarctionArrhythmiaDescription());
+            response.put("voltages", data.getVoltages());
             response.put("timestamps", data.getTimestamps());
             response.put("peakIndices", analyzer.getPeakIndices());
             
@@ -151,6 +158,12 @@ public class ECGController {
             response.put("drugType", analyzer.getDrugType());
             response.put("stDepression", analyzer.getSTDepression());
             response.put("qtInterval", analyzer.getQTInterval());
+            response.put("hasMyocardialScar", analyzer.hasMyocardialScar());
+            response.put("myocardialScarDescription", analyzer.getMyocardialScarDescription());
+            response.put("hasVentricularAneurysm", analyzer.hasVentricularAneurysm());
+            response.put("ventricularAneurysmDescription", analyzer.getVentricularAneurysmDescription());
+            response.put("hasPostInfarctionArrhythmia", analyzer.hasPostInfarctionArrhythmia());
+            response.put("postInfarctionArrhythmiaDescription", analyzer.getPostInfarctionArrhythmiaDescription());
             response.put("voltages", data.getVoltages());
             response.put("timestamps", data.getTimestamps());
             response.put("peakIndices", analyzer.getPeakIndices());
@@ -214,6 +227,12 @@ public class ECGController {
             response.put("drugType", analyzer.getDrugType());
             response.put("stDepression", analyzer.getSTDepression());
             response.put("qtInterval", analyzer.getQTInterval());
+            response.put("hasMyocardialScar", analyzer.hasMyocardialScar());
+            response.put("myocardialScarDescription", analyzer.getMyocardialScarDescription());
+            response.put("hasVentricularAneurysm", analyzer.hasVentricularAneurysm());
+            response.put("ventricularAneurysmDescription", analyzer.getVentricularAneurysmDescription());
+            response.put("hasPostInfarctionArrhythmia", analyzer.hasPostInfarctionArrhythmia());
+            response.put("postInfarctionArrhythmiaDescription", analyzer.getPostInfarctionArrhythmiaDescription());
             response.put("voltages", data.getVoltages());
             response.put("timestamps", data.getTimestamps());
             response.put("peakIndices", analyzer.getPeakIndices());
