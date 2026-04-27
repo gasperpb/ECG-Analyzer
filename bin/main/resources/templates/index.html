@@ -389,8 +389,19 @@
             font-size: 1.3em;
         }
 
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 550px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 15px;
+        }
+
         #ecgChart {
-            max-height: 400px;
+            width: 100% !important;
+            height: 100% !important;
         }
 
         .status-message {
@@ -647,6 +658,27 @@
                         <p><strong>Padrão ECG:</strong> <span id="drugPatternValue">--</span></p>
                     </div>
                 </div>
+
+                <!-- Myocardial Scar Alert -->
+                <div class="drug-alert" id="scarAlert" style="background: #f3e5f5; border-color: #7b1fa2; color: #4a148c;">
+                    <h3 style="color: #7b1fa2;">🔴 Cicatriz Miocárdica</h3>
+                    <p id="scarText"></p>
+                </div>
+
+                <!-- Ventricular Aneurysm Alert -->
+                <div class="drug-alert" id="aneurysmAlert" style="background: #ffebee; border-color: #c62828; color: #b71c1c;">
+                    <h3 style="color: #c62828;">⚠️ Aneurisma Ventricular</h3>
+                    <p id="aneurysmText"></p>
+                </div>
+
+                <!-- Post-Infarction Arrhythmia Alert -->
+                <div class="drug-alert" id="arrhythmiaAlert" style="background: #fff3e0; border-color: #e65100; color: #e65100;">
+                    <h3 style="color: #e65100;">⚡ Arritmia Pós-Infarto</h3>
+                    <p id="arrhythmiaText"></p>
+                </div>
+
+                <!-- 30+ New Diagnostics Section -->
+                <div id="newDiagnosticsContainer" style="margin-top: 20px;"></div>
             </div>
 
             <!-- Stats Display (Right Column) -->
@@ -665,6 +697,14 @@
                             <p id="statusText">Nenhum dado carregado</p>
                         </div>
                     </div>
+
+                    <!-- Save Buttons -->
+                    <div style="margin-top: 20px;">
+                        <h3 style="color: #667eea; margin-bottom: 10px;">💾 Salvar Dados</h3>
+                        <button class="button button-primary" onclick="downloadPDF()" style="margin-bottom: 10px;">📄 Download PDF Diagnóstico</button>
+                        <button class="button button-primary" onclick="saveAsCSV()" style="margin-bottom: 10px;">📥 Salvar como CSV</button>
+                        <button class="button button-secondary" onclick="saveAsTXT()">📄 Salvar como TXT</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -672,9 +712,13 @@
         <!-- Chart Section -->
         <div class="content" style="grid-template-columns: 1fr;">
             <div class="chart-section">
-                <h2>📈 Gráfico ECG</h2>
-                <canvas id="ecgChart"></canvas>
-                <p class="info-text">Azul: sinal de ECG | Vermelho: picos detectados</p>
+                <h2>📈 Gráfico ECG - Eletrocardiograma em Tempo Real</h2>
+                <div class="chart-container">
+                    <canvas id="ecgChart"></canvas>
+                </div>
+                <p class="info-text" style="margin-top: 15px; text-align: center; color: #666;">
+                    <strong>🔵 Azul:</strong> Sinal do ECG | <strong>🔴 Vermelho:</strong> Picos detectados
+                </p>
             </div>
         </div>
 
@@ -686,6 +730,7 @@
 
     <script>
         let ecgChart = null;
+        let lastAnalysisData = null;  // Armazenar dados da última análise
         const API_BASE = '/api/ecg';
 
         // Drag and Drop for CSV
@@ -735,7 +780,11 @@
             document.querySelectorAll('.tab-button').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.classList.add('active');
+            // Adiciona classe active ao botão clicado
+            const buttons = document.querySelectorAll('.tab-button');
+            if (tab === 'upload') buttons[0].classList.add('active');
+            else if (tab === 'image') buttons[1].classList.add('active');
+            else if (tab === 'simulate') buttons[2].classList.add('active');
         }
 
         // Upload CSV file
@@ -824,6 +873,9 @@
 
         // Display results
         function displayResults(data) {
+            // Armazenar dados para salvar depois
+            lastAnalysisData = data;
+            
             // Update stats
             document.getElementById('statsSection').style.display = 'grid';
             document.getElementById('bpmValue').textContent = data.bpm.toFixed(1);
@@ -937,6 +989,33 @@
                 drugAlert.classList.remove('show');
             }
 
+            // Handle Myocardial Scar Detection
+            const scarAlert = document.getElementById('scarAlert');
+            if (data.hasMyocardialScar) {
+                scarAlert.classList.add('show');
+                document.getElementById('scarText').textContent = data.myocardialScarDescription;
+            } else {
+                scarAlert.classList.remove('show');
+            }
+
+            // Handle Ventricular Aneurysm Detection
+            const aneurysmAlert = document.getElementById('aneurysmAlert');
+            if (data.hasVentricularAneurysm) {
+                aneurysmAlert.classList.add('show');
+                document.getElementById('aneurysmText').textContent = data.ventricularAneurysmDescription;
+            } else {
+                aneurysmAlert.classList.remove('show');
+            }
+
+            // Handle Post-Infarction Arrhythmia Detection
+            const arrhythmiaAlert = document.getElementById('arrhythmiaAlert');
+            if (data.hasPostInfarctionArrhythmia) {
+                arrhythmiaAlert.classList.add('show');
+                document.getElementById('arrhythmiaText').textContent = data.postInfarctionArrhythmiaDescription;
+            } else {
+                arrhythmiaAlert.classList.remove('show');
+            }
+
             // Update status
             const bpmBox = document.getElementById('bpmBox');
             if (data.isAnomalous) {
@@ -958,8 +1037,100 @@
             document.getElementById('statusText').textContent = data.hasInfarction ? 
                 data.infarctionDescription : data.anomalyDescription;
 
+            // Display 30+ New Diagnostics
+            displayNewDiagnostics(data);
+
             // Draw chart
             drawChart(data);
+        }
+
+        // Display 30+ New Diagnostics
+        function displayNewDiagnostics(data) {
+            const container = document.getElementById('newDiagnosticsContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            // Category definitions
+            const categories = {
+                'Arritmias': [
+                    { key: 'hasAtrialFibrillation', desc: 'atrialFibrillationDescription', icon: '📍' },
+                    { key: 'hasAtrialFlutter', desc: 'atrialFlutterDescription', icon: '📍' },
+                    { key: 'hasSuperventricularTachycardia', desc: 'superventricularTachycardiaDescription', icon: '📍' },
+                    { key: 'hasVentricularTachycardia', desc: 'ventricularTachycardiaDescription', icon: '📍' },
+                    { key: 'hasVentricularFibrillation', desc: 'ventricularFibrillationDescription', icon: '📍' },
+                    { key: 'hasEctopicBeats', desc: 'ectopicBeatsDescription', icon: '📍' }
+                ],
+                'Síndromes Congênitas': [
+                    { key: 'hasWolffParkinsonWhite', desc: 'wolffParkinsonWhiteDescription', icon: '🧬' },
+                    { key: 'hasBrugadaSyndrome', desc: 'brugadaSyndromeDescription', icon: '🧬' },
+                    { key: 'hasLongQT', desc: 'longQTDescription', icon: '🧬' },
+                    { key: 'hasShortQT', desc: 'shortQTDescription', icon: '🧬' }
+                ],
+                'Desordens de Eletrólito': [
+                    { key: 'hasHyperkalemia', desc: 'hyperkalemiaDescription', icon: '⚗️' },
+                    { key: 'hasHypokalemia', desc: 'hypokalemiaDescription', icon: '⚗️' },
+                    { key: 'hasHypercalcemia', desc: 'hypercalcemiaDescription', icon: '⚗️' },
+                    { key: 'hasHypocalcemia', desc: 'hypocalcemiaDescription', icon: '⚗️' }
+                ],
+                'Padrões Especiais': [
+                    { key: 'hasWellensPattern', desc: 'wellensPatternDescription', icon: '🌊' },
+                    { key: 'hasOsbornWave', desc: 'osbornWaveDescription', icon: '🌊' },
+                    { key: 'hasEarlyRepolarization', desc: 'earlyRepolarizationDescription', icon: '🌊' },
+                    { key: 'hasEpsilonWave', desc: 'epsilonWaveDescription', icon: '🌊' }
+                ],
+                'Hipertrofias': [
+                    { key: 'hasLVH', desc: 'lvhDescription', icon: '💪' },
+                    { key: 'hasRVH', desc: 'rvhDescription', icon: '💪' },
+                    { key: 'hasAtrialOverload', desc: 'atrialOverloadDescription', icon: '💪' }
+                ],
+                'Isquemias': [
+                    { key: 'hasSilentIschemia', desc: 'silentIschemiaDescription', icon: '🚫' },
+                    { key: 'hasPrinzmetalAngina', desc: 'prinzmetalAnginaDescription', icon: '🚫' },
+                    { key: 'hasCoronarySpasm', desc: 'coronarySpasmDescription', icon: '🚫' },
+                    { key: 'hasTakotsuboSyndrome', desc: 'takotsuboSyndromeDescription', icon: '🚫' }
+                ],
+                'Outras Condições': [
+                    { key: 'hasPulmonaryEmbolism', desc: 'pulmonaryEmbolismDescription', icon: '⚠️' },
+                    { key: 'hasPulmonaryHypertension', desc: 'pulmonaryHypertensionDescription', icon: '⚠️' },
+                    { key: 'hasChronicLungDisease', desc: 'chronicLungDiseaseDescription', icon: '⚠️' },
+                    { key: 'hasHypothermia', desc: 'hypothermiaDescription', icon: '❄️' },
+                    { key: 'hasSleepApnea', desc: 'sleepApneaDescription', icon: '😴' },
+                    { key: 'hasVasovagalSyncope', desc: 'vasovagalSyncopeDescription', icon: '🌀' }
+                ]
+            };
+            
+            let hasNewDiagnostics = false;
+            
+            // Process each category
+            for (const [categoryName, diagnostics] of Object.entries(categories)) {
+                const detected = diagnostics.filter(diag => data[diag.key]);
+                if (detected.length === 0) continue;
+                
+                hasNewDiagnostics = true;
+                
+                // Create category section
+                const categoryDiv = document.createElement('div');
+                categoryDiv.style.cssText = 'background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #667eea;';
+                categoryDiv.innerHTML = `<h4 style="color: #667eea; margin-bottom: 10px;">${categoryName}</h4>`;
+                
+                // Add each detected diagnostic
+                detected.forEach(diag => {
+                    const item = document.createElement('div');
+                    item.style.cssText = 'background: white; padding: 10px; margin-bottom: 8px; border-radius: 5px; border-left: 3px solid #ffc107;';
+                    item.innerHTML = `
+                        <p style="margin: 0; font-weight: bold;">
+                            ${diag.icon} ${diag.key.replace(/([A-Z])/g, ' $1').trim()}
+                        </p>
+                        <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #555;">
+                            ${data[diag.desc] || 'Detectado'}
+                        </p>
+                    `;
+                    categoryDiv.appendChild(item);
+                });
+                
+                container.appendChild(categoryDiv);
+            }
         }
 
         // Draw ECG Chart
@@ -969,39 +1140,46 @@
             // Create dataset
             const datasets = [];
             
-            // ECG signal
-            const ecgData = data.voltages.map((v, i) => ({
-                x: i,
-                y: v
-            }));
+            // ECG signal - using line dataset for better line visualization
+            const labels = data.voltages.map((v, i) => i);
+            const ecgVoltages = data.voltages;
 
             datasets.push({
-                label: 'Sinal ECG',
-                data: ecgData,
+                label: '🔵 Sinal ECG',
+                data: ecgVoltages,
                 borderColor: '#667eea',
-                backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                borderWidth: 2,
+                backgroundColor: 'rgba(102, 126, 234, 0.05)',
+                borderWidth: 2.5,
                 fill: true,
                 tension: 0,
                 pointRadius: 0,
-                pointHoverRadius: 0
+                pointHoverRadius: 5,
+                pointBorderWidth: 2,
+                pointBackgroundColor: '#667eea',
+                segment: {
+                    borderColor: '#667eea',
+                    borderWidth: 2.5
+                }
             });
 
-            // Peaks
+            // Peaks overlay (if needed)
             if (data.peakIndices && data.peakIndices.length > 0) {
-                const peaksData = data.peakIndices.map(idx => ({
-                    x: idx,
-                    y: data.voltages[idx]
-                }));
+                const peaksData = new Array(ecgVoltages.length).fill(null);
+                data.peakIndices.forEach(idx => {
+                    peaksData[idx] = data.voltages[idx];
+                });
 
                 datasets.push({
-                    label: 'Picos Detectados',
+                    label: '🔴 Picos Detectados',
                     data: peaksData,
                     borderColor: '#ff6b6b',
                     backgroundColor: '#ff6b6b',
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    showLine: false
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    pointBorderWidth: 2,
+                    pointBorderColor: '#ff0000',
+                    showLine: false,
+                    borderWidth: 0
                 });
             }
 
@@ -1010,31 +1188,71 @@
             }
 
             ecgChart = new Chart(ctx, {
-                type: 'scatter',
+                type: 'line',
                 data: {
+                    labels: labels,
                     datasets: datasets
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 0
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
                     plugins: {
                         legend: {
                             display: true,
-                            position: 'top'
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 15,
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        filler: {
+                            propagate: true
                         }
                     },
                     scales: {
                         x: {
+                            display: true,
                             title: {
                                 display: true,
-                                text: 'Amostras'
+                                text: 'Amostras (Tempo)',
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                }
                             },
-                            display: true
+                            grid: {
+                                display: true,
+                                drawBorder: true,
+                                color: 'rgba(200, 200, 200, 0.1)',
+                                lineWidth: 0.5
+                            }
                         },
                         y: {
+                            display: true,
                             title: {
                                 display: true,
-                                text: 'Voltagem (mV)'
+                                text: 'Voltagem (mV)',
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                display: true,
+                                drawBorder: true,
+                                color: 'rgba(102, 126, 234, 0.1)',
+                                lineWidth: 1
                             }
                         }
                     }
@@ -1061,11 +1279,377 @@
 
         // Check API health on page load
         window.addEventListener('load', () => {
+            // Set image tab as default on page load
+            const imageTabButton = document.querySelectorAll('.tab-button')[1];
+            switchTab('image');
+            imageTabButton.classList.add('active');
+            
             fetch(`${API_BASE}/health`)
                 .then(r => r.json())
                 .then(data => console.log('API Status:', data))
                 .catch(e => console.error('API offline:', e));
         });
+
+        // Salvar dados como CSV
+        function saveAsCSV() {
+            if (!lastAnalysisData) {
+                showStatus('Nenhum dado para salvar. Faça uma análise primeiro!', 'error');
+                return;
+            }
+
+            const data = lastAnalysisData;
+            let csv = 'RELATÓRIO DE ANÁLISE ECG\n';
+            csv += `Data e Hora: ${new Date().toLocaleString('pt-BR')}\n\n`;
+            
+            // Estatísticas principais
+            csv += '=== ESTATÍSTICAS PRINCIPAIS ===\n';
+            csv += `BPM,${data.bpm.toFixed(1)}\n`;
+            csv += `Batidas Detectadas,${data.peakCount}\n`;
+            csv += `Duração (segundos),${data.duration.toFixed(2)}\n`;
+            csv += `Voltagem Mínima (mV),${data.minVoltage.toFixed(3)}\n`;
+            csv += `Voltagem Máxima (mV),${data.maxVoltage.toFixed(3)}\n`;
+            csv += `Voltagem Média (mV),${data.avgVoltage.toFixed(3)}\n\n`;
+
+            // Informações de diagnostico
+            csv += '=== DIAGNÓSTICO ===\n';
+            csv += `Status Anômalo,${data.isAnomalous ? 'SIM' : 'NÃO'}\n`;
+            csv += `Descrição Anomalia,"${data.anomalyDescription}"\n`;
+            csv += `Infarto Detectado,${data.hasInfarction ? 'SIM - ' + data.infarctionSeverity : 'NÃO'}\n`;
+            csv += `Descrição Infarto,"${data.infarctionDescription}"\n`;
+            csv += `Elevação ST (mV),${data.stElevation.toFixed(3)}\n\n`;
+
+            // Distúrbios de Condução
+            csv += '=== DISTÚRBIOS DE CONDUÇÃO ===\n';
+            csv += `Distúrbio Detectado,${data.hasConductionDisorder ? 'SIM' : 'NÃO'}\n`;
+            csv += `Descrição,"${data.conductionDescription}"\n`;
+            csv += `Intervalo PR (ms),${data.prInterval.toFixed(0)}\n`;
+            csv += `Largura QRS (ms),${data.qrsWidth.toFixed(0)}\n`;
+            csv += `Tipo Bloqueio Ramo,"${data.branchBlockType || 'Nenhum'}"\n`;
+            csv += `Tipo Bloqueio AV,"${data.avBlockType || 'Nenhum'}"\n\n`;
+
+            // Inflamação
+            csv += '=== INFLAMAÇÃO CARDÍACA ===\n';
+            csv += `Inflamação Detectada,${data.hasInflammation ? 'SIM' : 'NÃO'}\n`;
+            csv += `Tipo,"${data.inflammationType || 'Nenhuma'}"\n`;
+            csv += `Elevação ST Difusa (mV),${data.diffuseSTElevation.toFixed(3)}\n`;
+            csv += `Descrição,"${data.inflammationDescription}"\n\n`;
+
+            // Efeitos de Medicamentos
+            csv += '=== EFEITOS DE MEDICAMENTOS ===\n';
+            csv += `Efeito Detectado,${data.hasDrugEffect ? 'SIM' : 'NÃO'}\n`;
+            csv += `Medicamento Suspeito,"${data.drugType || 'Nenhum'}"\n`;
+            csv += `Depressão ST (mV),${data.stDepression.toFixed(3)}\n`;
+            csv += `Intervalo QT (ms),${data.qtInterval.toFixed(0)}\n`;
+            csv += `Descrição,"${data.drugEffectDescription}"\n\n`;
+
+            // Outros problemas
+            csv += '=== OUTROS PROBLEMAS ===\n';
+            csv += `Cicatriz Miocárdica,${data.hasMyocardialScar ? 'SIM' : 'NÃO'}\n`;
+            csv += `Descrição Cicatriz,"${data.myocardialScarDescription}"\n`;
+            csv += `Aneurisma Ventricular,${data.hasVentricularAneurysm ? 'SIM' : 'NÃO'}\n`;
+            csv += `Descrição Aneurisma,"${data.ventricularAneurysmDescription}"\n`;
+            csv += `Arritmia Pós-Infarto,${data.hasPostInfarctionArrhythmia ? 'SIM' : 'NÃO'}\n`;
+            csv += `Descrição Arritmia,"${data.postInfarctionArrhythmiaDescription}"\n\n`;
+
+            // Dados de voltagem (opcional - comenta para arquivo menor)
+            csv += '=== DADOS DE VOLTAGEM (Amostra) ===\n';
+            csv += 'Índice,Voltagem (mV),Tempo (s)\n';
+            
+            // Salva apenas cada 10º ponto para não ficar muito grande
+            if (data.voltages && data.timestamps) {
+                for (let i = 0; i < data.voltages.length; i += 10) {
+                    csv += `${i},${data.voltages[i].toFixed(3)},${(data.timestamps[i] || 0).toFixed(3)}\n`;
+                }
+            }
+
+            // 30+ Novos Diagnósticos
+            csv += '=== 30+ NOVOS DIAGNÓSTICOS ===\n';
+            csv += '--- ARRITMIAS ---\n';
+            csv += `Fibrilação Atrial,${data.hasAtrialFibrillation ? 'SIM' : 'NÃO'},"${data.atrialFibrillationDescription || ''}"\n`;
+            csv += `Flutter Atrial,${data.hasAtrialFlutter ? 'SIM' : 'NÃO'},"${data.atrialFlutterDescription || ''}"\n`;
+            csv += `Taquicardia Supraventricular,${data.hasSuperventricularTachycardia ? 'SIM' : 'NÃO'},"${data.superventricularTachycardiaDescription || ''}"\n`;
+            csv += `Taquicardia Ventricular,${data.hasVentricularTachycardia ? 'SIM' : 'NÃO'},"${data.ventricularTachycardiaDescription || ''}"\n`;
+            csv += `Fibrilação Ventricular,${data.hasVentricularFibrillation ? 'SIM' : 'NÃO'},"${data.ventricularFibrillationDescription || ''}"\n`;
+            csv += `Batidas Ectópicas,${data.hasEctopicBeats ? 'SIM' : 'NÃO'},"${data.ectopicBeatsDescription || ''}"\n`;
+            
+            csv += '\n--- SÍNDROMES CONGÊNITAS ---\n';
+            csv += `Wolff-Parkinson-White,${data.hasWolffParkinsonWhite ? 'SIM' : 'NÃO'},"${data.wolffParkinsonWhiteDescription || ''}"\n`;
+            csv += `Síndrome de Brugada,${data.hasBrugadaSyndrome ? 'SIM' : 'NÃO'},"${data.brugadaSyndromeDescription || ''}"\n`;
+            csv += `QT Longo,${data.hasLongQT ? 'SIM' : 'NÃO'},"${data.longQTDescription || ''}"\n`;
+            csv += `QT Curto,${data.hasShortQT ? 'SIM' : 'NÃO'},"${data.shortQTDescription || ''}"\n`;
+            
+            csv += '\n--- DISTÚRBIOS DE ELETRÓLITO ---\n';
+            csv += `Hipercalemia,${data.hasHyperkalemia ? 'SIM' : 'NÃO'},"${data.hyperkalemiaDescription || ''}"\n`;
+            csv += `Hipocalemia,${data.hasHypokalemia ? 'SIM' : 'NÃO'},"${data.hypokalemiaDescription || ''}"\n`;
+            csv += `Hipercalcemia,${data.hasHypercalcemia ? 'SIM' : 'NÃO'},"${data.hypercalcemiaDescription || ''}"\n`;
+            csv += `Hipocalcemia,${data.hasHypocalcemia ? 'SIM' : 'NÃO'},"${data.hypocalcemiaDescription || ''}"\n`;
+            
+            csv += '\n--- PADRÕES ESPECIAIS ---\n';
+            csv += `Padrão de Wellens,${data.hasWellensPattern ? 'SIM' : 'NÃO'},"${data.wellensPatternDescription || ''}"\n`;
+            csv += `Onda de Osborn,${data.hasOsbornWave ? 'SIM' : 'NÃO'},"${data.osbornWaveDescription || ''}"\n`;
+            csv += `Repolarização Precoce,${data.hasEarlyRepolarization ? 'SIM' : 'NÃO'},"${data.earlyRepolarizationDescription || ''}"\n`;
+            csv += `Onda Épsilon,${data.hasEpsilonWave ? 'SIM' : 'NÃO'},"${data.epsilonWaveDescription || ''}"\n`;
+            
+            csv += '\n--- HIPERTROFIAS ---\n';
+            csv += `Hipertrofia VE,${data.hasLVH ? 'SIM' : 'NÃO'},"${data.lvhDescription || ''}"\n`;
+            csv += `Hipertrofia VD,${data.hasRVH ? 'SIM' : 'NÃO'},"${data.rvhDescription || ''}"\n`;
+            csv += `Sobrecarga Atrial,${data.hasAtrialOverload ? 'SIM' : 'NÃO'},"${data.atrialOverloadDescription || ''}"\n`;
+            
+            csv += '\n--- ISQUEMIAS ---\n';
+            csv += `Isquemia Silenciosa,${data.hasSilentIschemia ? 'SIM' : 'NÃO'},"${data.silentIschemiaDescription || ''}"\n`;
+            csv += `Angina de Prinzmetal,${data.hasPrinzmetalAngina ? 'SIM' : 'NÃO'},"${data.prinzmetalAnginaDescription || ''}"\n`;
+            csv += `Espasmo Coronário,${data.hasCoronarySpasm ? 'SIM' : 'NÃO'},"${data.coronarySpasmDescription || ''}"\n`;
+            csv += `Síndrome de Takotsubo,${data.hasTakotsuboSyndrome ? 'SIM' : 'NÃO'},"${data.takotsuboSyndromeDescription || ''}"\n`;
+            
+            csv += '\n--- OUTRAS CONDIÇÕES ---\n';
+            csv += `Embolia Pulmonar,${data.hasPulmonaryEmbolism ? 'SIM' : 'NÃO'},"${data.pulmonaryEmbolismDescription || ''}"\n`;
+            csv += `Hipertensão Pulmonar,${data.hasPulmonaryHypertension ? 'SIM' : 'NÃO'},"${data.pulmonaryHypertensionDescription || ''}"\n`;
+            csv += `Doença Pulmonar Crônica,${data.hasChronicLungDisease ? 'SIM' : 'NÃO'},"${data.chronicLungDiseaseDescription || ''}"\n`;
+            csv += `Hipotermia,${data.hasHypothermia ? 'SIM' : 'NÃO'},"${data.hypothermiaDescription || ''}"\n`;
+            csv += `Apneia do Sono,${data.hasSleepApnea ? 'SIM' : 'NÃO'},"${data.sleepApneaDescription || ''}"\n`;
+            csv += `Síncope Vasovagal,${data.hasVasovagalSyncope ? 'SIM' : 'NÃO'},"${data.vasovagalSyncopeDescription || ''}"\n`;
+
+            // Baixar arquivo
+            downloadFile(csv, `ECG_Analise_${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
+        }
+
+        // Salvar dados como TXT
+        function saveAsTXT() {
+            if (!lastAnalysisData) {
+                showStatus('Nenhum dado para salvar. Faça uma análise primeiro!', 'error');
+                return;
+            }
+
+            const data = lastAnalysisData;
+            let txt = '╔════════════════════════════════════════════════════════════╗\n';
+            txt += '║           RELATÓRIO DE ANÁLISE DE ECG                       ║\n';
+            txt += '╚════════════════════════════════════════════════════════════╝\n\n';
+            
+            txt += `Data e Hora: ${new Date().toLocaleString('pt-BR')}\n\n`;
+            
+            // Seção 1: Estatísticas Principais
+            txt += '─────────────────────────────────────────────────────────────\n';
+            txt += 'ESTATÍSTICAS PRINCIPAIS\n';
+            txt += '─────────────────────────────────────────────────────────────\n';
+            txt += `• BPM (Frequência Cardíaca):         ${data.bpm.toFixed(1)} bpm\n`;
+            txt += `• Batidas Detectadas:                ${data.peakCount}\n`;
+            txt += `• Duração da Gravação:               ${data.duration.toFixed(2)} segundos\n`;
+            txt += `• Voltagem Mínima:                   ${data.minVoltage.toFixed(3)} mV\n`;
+            txt += `• Voltagem Máxima:                   ${data.maxVoltage.toFixed(3)} mV\n`;
+            txt += `• Voltagem Média:                    ${data.avgVoltage.toFixed(3)} mV\n\n`;
+
+            // Seção 2: Diagnóstico Geral
+            txt += '─────────────────────────────────────────────────────────────\n';
+            txt += 'DIAGNÓSTICO GERAL\n';
+            txt += '─────────────────────────────────────────────────────────────\n';
+            txt += `• Apresenta Anomalias:               ${data.isAnomalous ? 'SIM ⚠️' : 'NÃO ✓'}\n`;
+            txt += `  Descrição: ${data.anomalyDescription}\n\n`;
+
+            // Seção 3: Infarto
+            if (data.hasInfarction) {
+                txt += '─────────────────────────────────────────────────────────────\n';
+                txt += '⚠️ ALERTA: INFARTO DETECTADO\n';
+                txt += '─────────────────────────────────────────────────────────────\n';
+                txt += `• Descrição: ${data.infarctionDescription}\n`;
+                txt += `• Elevação ST: ${data.stElevation.toFixed(3)} mV\n`;
+                txt += `• Severidade: ${data.infarctionSeverity >= 4 ? 'CRÍTICA' : data.infarctionSeverity >= 3 ? 'ALTA' : 'MODERADA'}\n`;
+                txt += `• ⚠️ PROCURE EMERGÊNCIA IMEDIATAMENTE!\n\n`;
+            }
+
+            // Seção 4: Distúrbios de Condução
+            txt += '─────────────────────────────────────────────────────────────\n';
+            txt += 'DISTÚRBIOS DE CONDUÇÃO ELÉTRICA\n';
+            txt += '─────────────────────────────────────────────────────────────\n';
+            txt += `• Distúrbio Detectado:               ${data.hasConductionDisorder ? 'SIM' : 'NÃO'}\n`;
+            txt += `  Descrição: ${data.conductionDescription}\n`;
+            txt += `• Intervalo PR:                      ${data.prInterval.toFixed(0)} ms (Normal: 120-200ms)\n`;
+            txt += `• Largura QRS:                       ${data.qrsWidth.toFixed(0)} ms (Normal: 80-120ms)\n`;
+            txt += `• Tipo de Bloqueio de Ramo:          ${data.branchBlockType || 'Nenhum'}\n`;
+            txt += `• Tipo de Bloqueio AV:               ${data.avBlockType || 'Nenhum'}\n\n`;
+
+            // Seção 5: Inflamação
+            if (data.hasInflammation) {
+                txt += '─────────────────────────────────────────────────────────────\n';
+                txt += '⚠️ INFLAMAÇÃO CARDÍACA DETECTADA\n';
+                txt += '─────────────────────────────────────────────────────────────\n';
+                txt += `• Tipo: ${data.inflammationType}\n`;
+                txt += `• Elevação ST Difusa: ${data.diffuseSTElevation.toFixed(3)} mV\n`;
+                txt += `  Descrição: ${data.inflammationDescription}\n\n`;
+            }
+
+            // Seção 6: Efeitos de Medicamentos
+            if (data.hasDrugEffect) {
+                txt += '─────────────────────────────────────────────────────────────\n';
+                txt += '💊 EFEITO DE MEDICAMENTOS DETECTADO\n';
+                txt += '─────────────────────────────────────────────────────────────\n';
+                txt += `• Medicamento Suspeito: ${data.drugType}\n`;
+                txt += `• Depressão ST: ${data.stDepression.toFixed(3)} mV\n`;
+                txt += `• Intervalo QT: ${data.qtInterval.toFixed(0)} ms\n`;
+                txt += `  Descrição: ${data.drugEffectDescription}\n\n`;
+            }
+
+            // Seção 7: Outros Problemas
+            txt += '─────────────────────────────────────────────────────────────\n';
+            txt += 'OUTROS ACHADOS\n';
+            txt += '─────────────────────────────────────────────────────────────\n';
+            txt += `• Cicatriz Miocárdica: ${data.hasMyocardialScar ? 'SIM' : 'NÃO'}\n`;
+            if (data.hasMyocardialScar) {
+                txt += `  ${data.myocardialScarDescription}\n`;
+            }
+            txt += `• Aneurisma Ventricular: ${data.hasVentricularAneurysm ? 'SIM' : 'NÃO'}\n`;
+            if (data.hasVentricularAneurysm) {
+                txt += `  ${data.ventricularAneurysmDescription}\n`;
+            }
+            txt += `• Arritmia Pós-Infarto: ${data.hasPostInfarctionArrhythmia ? 'SIM' : 'NÃO'}\n`;
+            if (data.hasPostInfarctionArrhythmia) {
+                txt += `  ${data.postInfarctionArrhythmiaDescription}\n`;
+            }
+            txt += '\n';
+
+            // 30+ Novos Diagnósticos
+            txt += '═══════════════════════════════════════════════════════════════\n';
+            txt += '30+ NOVOS DIAGNÓSTICOS AVANÇADOS\n';
+            txt += '═══════════════════════════════════════════════════════════════\n\n';
+            
+            // Arritmias
+            if (data.hasAtrialFibrillation || data.hasAtrialFlutter || data.hasSuperventricularTachycardia || 
+                data.hasVentricularTachycardia || data.hasVentricularFibrillation || data.hasEctopicBeats) {
+                txt += '📍 ARRITMIAS\n';
+                if (data.hasAtrialFibrillation) txt += `  • Fibrilação Atrial: ${data.atrialFibrillationDescription}\n`;
+                if (data.hasAtrialFlutter) txt += `  • Flutter Atrial: ${data.atrialFlutterDescription}\n`;
+                if (data.hasSuperventricularTachycardia) txt += `  • Taquicardia Supraventricular: ${data.superventricularTachycardiaDescription}\n`;
+                if (data.hasVentricularTachycardia) txt += `  • Taquicardia Ventricular: ${data.ventricularTachycardiaDescription}\n`;
+                if (data.hasVentricularFibrillation) txt += `  • Fibrilação Ventricular: ${data.ventricularFibrillationDescription}\n`;
+                if (data.hasEctopicBeats) txt += `  • Batidas Ectópicas: ${data.ectopicBeatsDescription}\n`;
+                txt += '\n';
+            }
+            
+            // Síndromes Congênitas
+            if (data.hasWolffParkinsonWhite || data.hasBrugadaSyndrome || data.hasLongQT || data.hasShortQT) {
+                txt += '🧬 SÍNDROMES CONGÊNITAS\n';
+                if (data.hasWolffParkinsonWhite) txt += `  • Wolff-Parkinson-White: ${data.wolffParkinsonWhiteDescription}\n`;
+                if (data.hasBrugadaSyndrome) txt += `  • Síndrome de Brugada: ${data.brugadaSyndromeDescription}\n`;
+                if (data.hasLongQT) txt += `  • QT Longo: ${data.longQTDescription}\n`;
+                if (data.hasShortQT) txt += `  • QT Curto: ${data.shortQTDescription}\n`;
+                txt += '\n';
+            }
+            
+            // Distúrbios de Eletrólito
+            if (data.hasHyperkalemia || data.hasHypokalemia || data.hasHypercalcemia || data.hasHypocalcemia) {
+                txt += '⚗️ DISTÚRBIOS DE ELETRÓLITO\n';
+                if (data.hasHyperkalemia) txt += `  • Hipercalemia: ${data.hyperkalemiaDescription}\n`;
+                if (data.hasHypokalemia) txt += `  • Hipocalemia: ${data.hypokalemiaDescription}\n`;
+                if (data.hasHypercalcemia) txt += `  • Hipercalcemia: ${data.hypercalcemiaDescription}\n`;
+                if (data.hasHypocalcemia) txt += `  • Hipocalcemia: ${data.hypocalcemiaDescription}\n`;
+                txt += '\n';
+            }
+            
+            // Padrões Especiais
+            if (data.hasWellensPattern || data.hasOsbornWave || data.hasEarlyRepolarization || data.hasEpsilonWave) {
+                txt += '🌊 PADRÕES ESPECIAIS\n';
+                if (data.hasWellensPattern) txt += `  • Padrão de Wellens: ${data.wellensPatternDescription}\n`;
+                if (data.hasOsbornWave) txt += `  • Onda de Osborn: ${data.osbornWaveDescription}\n`;
+                if (data.hasEarlyRepolarization) txt += `  • Repolarização Precoce: ${data.earlyRepolarizationDescription}\n`;
+                if (data.hasEpsilonWave) txt += `  • Onda Épsilon: ${data.epsilonWaveDescription}\n`;
+                txt += '\n';
+            }
+            
+            // Hipertrofias
+            if (data.hasLVH || data.hasRVH || data.hasAtrialOverload) {
+                txt += '💪 HIPERTROFIAS\n';
+                if (data.hasLVH) txt += `  • Hipertrofia VE: ${data.lvhDescription}\n`;
+                if (data.hasRVH) txt += `  • Hipertrofia VD: ${data.rvhDescription}\n`;
+                if (data.hasAtrialOverload) txt += `  • Sobrecarga Atrial: ${data.atrialOverloadDescription}\n`;
+                txt += '\n';
+            }
+            
+            // Isquemias
+            if (data.hasSilentIschemia || data.hasPrinzmetalAngina || data.hasCoronarySpasm || data.hasTakotsuboSyndrome) {
+                txt += '🚫 ISQUEMIAS\n';
+                if (data.hasSilentIschemia) txt += `  • Isquemia Silenciosa: ${data.silentIschemiaDescription}\n`;
+                if (data.hasPrinzmetalAngina) txt += `  • Angina de Prinzmetal: ${data.prinzmetalAnginaDescription}\n`;
+                if (data.hasCoronarySpasm) txt += `  • Espasmo Coronário: ${data.coronarySpasmDescription}\n`;
+                if (data.hasTakotsuboSyndrome) txt += `  • Síndrome de Takotsubo: ${data.takotsuboSyndromeDescription}\n`;
+                txt += '\n';
+            }
+            
+            // Outras Condições
+            if (data.hasPulmonaryEmbolism || data.hasPulmonaryHypertension || data.hasChronicLungDisease || 
+                data.hasHypothermia || data.hasSleepApnea || data.hasVasovagalSyncope) {
+                txt += '⚠️ OUTRAS CONDIÇÕES\n';
+                if (data.hasPulmonaryEmbolism) txt += `  • Embolia Pulmonar: ${data.pulmonaryEmbolismDescription}\n`;
+                if (data.hasPulmonaryHypertension) txt += `  • Hipertensão Pulmonar: ${data.pulmonaryHypertensionDescription}\n`;
+                if (data.hasChronicLungDisease) txt += `  • Doença Pulmonar Crônica: ${data.chronicLungDiseaseDescription}\n`;
+                if (data.hasHypothermia) txt += `  • Hipotermia: ${data.hypothermiaDescription}\n`;
+                if (data.hasSleepApnea) txt += `  • Apneia do Sono: ${data.sleepApneaDescription}\n`;
+                if (data.hasVasovagalSyncope) txt += `  • Síncope Vasovagal: ${data.vasovagalSyncopeDescription}\n`;
+                txt += '\n';
+            }
+
+            txt += '─────────────────────────────────────────────────────────────\n';
+            txt += 'RECOMENDAÇÕES\n';
+            txt += '─────────────────────────────────────────────────────────────\n';
+            txt += '• Este relatório é uma análise auxiliar e deve ser validado\n';
+            txt += '  por um profissional de saúde qualificado.\n';
+            txt += '• Em caso de suspeita de infarto, procure emergência imediatamente.\n';
+            txt += '─────────────────────────────────────────────────────────────\n';
+
+            downloadFile(txt, `ECG_Analise_${new Date().toISOString().split('T')[0]}.txt`, 'text/plain');
+        }
+
+        // Função auxiliar para baixar arquivo
+        function downloadFile(content, filename, type) {
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:' + type + ';charset=utf-8,' + encodeURIComponent(content));
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+            showStatus(`Arquivo ${filename} baixado com sucesso!`, 'success');
+        }
+
+        // Baixar PDF de diagnóstico
+        function downloadPDF() {
+            if (!lastAnalysisData) {
+                showStatus('Nenhum dado para gerar PDF. Faça uma análise primeiro!', 'error');
+                return;
+            }
+
+            showStatus('Gerando PDF de diagnóstico...', 'loading');
+
+            fetch(`${API_BASE}/generate-pdf`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(lastAnalysisData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                } else {
+                    throw new Error('Erro ao gerar PDF');
+                }
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                const timestamp = new Date().toISOString().split('T')[0];
+                link.download = `diagnostico_ecg_${timestamp}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(link);
+                showStatus('PDF de diagnóstico baixado com sucesso!', 'success');
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                showStatus('Erro ao gerar PDF: ' + error.message, 'error');
+            });
+        }
+
     </script>
 </body>
 </html>

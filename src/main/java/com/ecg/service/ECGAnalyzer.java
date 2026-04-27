@@ -39,6 +39,82 @@ public class ECGAnalyzer {
     private boolean hasPostInfarctionArrhythmia;
     private String postInfarctionArrhythmiaDescription;
     
+    // Novos diagnósticos - Arritmias
+    private boolean hasAtrialFibrillation;
+    private String atrialFibrillationDescription;
+    private boolean hasAtrialFlutter;
+    private String atrialFlutterDescription;
+    private boolean hasSuperventricularTachycardia;
+    private String superventricularTachycardiaDescription;
+    private boolean hasVentricularTachycardia;
+    private String ventricularTachycardiaDescription;
+    private boolean hasVentricularFibrillation;
+    private String ventricularFibrillationDescription;
+    private boolean hasEctopicBeats;
+    private String ectopicBeatsDescription;
+    
+    // Síndromes Congênitas
+    private boolean hasWolffParkinsonWhite;
+    private String wolffParkinsonWhiteDescription;
+    private boolean hasBrugadaSyndrome;
+    private String brugadaSyndromeDescription;
+    private boolean hasLongQT;
+    private String longQTDescription;
+    private boolean hasShortQT;
+    private String shortQTDescription;
+    
+    // Desordens de Eletrólito
+    private boolean hasHyperkalemia;
+    private String hyperkalemiaDescription;
+    private boolean hasHypokalemia;
+    private String hypokalemiaDescription;
+    private boolean hasHypercalcemia;
+    private String hypercalcemiaDescription;
+    private boolean hasHypocalcemia;
+    private String hypocalcemiaDescription;
+    
+    // Padrões Especiais
+    private boolean hasWellensPattern;
+    private String wellensPatternDescription;
+    private boolean hasOsbornWave;
+    private String osbornWaveDescription;
+    private boolean hasEarlyRepolarization;
+    private String earlyRepolarizationDescription;
+    private boolean hasEpsilonWave;
+    private String epsilonWaveDescription;
+    
+    // Hipertrofias
+    private boolean hasLVH;
+    private String lvhDescription;
+    private boolean hasRVH;
+    private String rvhDescription;
+    private boolean hasAtrialOverload;
+    private String atrialOverloadDescription;
+    
+    // Isquemias
+    private boolean hasSilentIschemia;
+    private String silentIschemiaDescription;
+    private boolean hasPrinzmetalAngina;
+    private String prinzmetalAnginaDescription;
+    private boolean hasCoronarySpasm;
+    private String coronarySpasmDescription;
+    private boolean hasTakotsuboSyndrome;
+    private String takotsuboSyndromeDescription;
+    
+    // Outras Condições
+    private boolean hasPulmonaryEmbolism;
+    private String pulmonaryEmbolismDescription;
+    private boolean hasPulmonaryHypertension;
+    private String pulmonaryHypertensionDescription;
+    private boolean hasChronicLungDisease;
+    private String chronicLungDiseaseDescription;
+    private boolean hasHypothermia;
+    private String hypothermiaDescription;
+    private boolean hasSleepApnea;
+    private String sleepApneaDescription;
+    private boolean hasVasovagalSyncope;
+    private String vasovagalSyncopeDescription;
+    
     public ECGAnalyzer(ECGData data) {
         this.data = data;
         this.peakIndices = new ArrayList<>();
@@ -69,6 +145,83 @@ public class ECGAnalyzer {
         this.ventricularAneurysmDescription = "";
         this.hasPostInfarctionArrhythmia = false;
         this.postInfarctionArrhythmiaDescription = "";
+        
+        // Inicializar novos diagnósticos - Arritmias
+        this.hasAtrialFibrillation = false;
+        this.atrialFibrillationDescription = "";
+        this.hasAtrialFlutter = false;
+        this.atrialFlutterDescription = "";
+        this.hasSuperventricularTachycardia = false;
+        this.superventricularTachycardiaDescription = "";
+        this.hasVentricularTachycardia = false;
+        this.ventricularTachycardiaDescription = "";
+        this.hasVentricularFibrillation = false;
+        this.ventricularFibrillationDescription = "";
+        this.hasEctopicBeats = false;
+        this.ectopicBeatsDescription = "";
+        
+        // Síndromes Congênitas
+        this.hasWolffParkinsonWhite = false;
+        this.wolffParkinsonWhiteDescription = "";
+        this.hasBrugadaSyndrome = false;
+        this.brugadaSyndromeDescription = "";
+        this.hasLongQT = false;
+        this.longQTDescription = "";
+        this.hasShortQT = false;
+        this.shortQTDescription = "";
+        
+        // Desordens de Eletrólito
+        this.hasHyperkalemia = false;
+        this.hyperkalemiaDescription = "";
+        this.hasHypokalemia = false;
+        this.hypokalemiaDescription = "";
+        this.hasHypercalcemia = false;
+        this.hypercalcemiaDescription = "";
+        this.hasHypocalcemia = false;
+        this.hypocalcemiaDescription = "";
+        
+        // Padrões Especiais
+        this.hasWellensPattern = false;
+        this.wellensPatternDescription = "";
+        this.hasOsbornWave = false;
+        this.osbornWaveDescription = "";
+        this.hasEarlyRepolarization = false;
+        this.earlyRepolarizationDescription = "";
+        this.hasEpsilonWave = false;
+        this.epsilonWaveDescription = "";
+        
+        // Hipertrofias
+        this.hasLVH = false;
+        this.lvhDescription = "";
+        this.hasRVH = false;
+        this.rvhDescription = "";
+        this.hasAtrialOverload = false;
+        this.atrialOverloadDescription = "";
+        
+        // Isquemias
+        this.hasSilentIschemia = false;
+        this.silentIschemiaDescription = "";
+        this.hasPrinzmetalAngina = false;
+        this.prinzmetalAnginaDescription = "";
+        this.hasCoronarySpasm = false;
+        this.coronarySpasmDescription = "";
+        this.hasTakotsuboSyndrome = false;
+        this.takotsuboSyndromeDescription = "";
+        
+        // Outras Condições
+        this.hasPulmonaryEmbolism = false;
+        this.pulmonaryEmbolismDescription = "";
+        this.hasPulmonaryHypertension = false;
+        this.pulmonaryHypertensionDescription = "";
+        this.hasChronicLungDisease = false;
+        this.chronicLungDiseaseDescription = "";
+        this.hasHypothermia = false;
+        this.hypothermiaDescription = "";
+        this.hasSleepApnea = false;
+        this.sleepApneaDescription = "";
+        this.hasVasovagalSyncope = false;
+        this.vasovagalSyncopeDescription = "";
+        
         analyze();
     }
     
@@ -86,6 +239,34 @@ public class ECGAnalyzer {
         detectMyocardialScar();
         detectVentricularAneurysm();
         detectPostInfarctionArrhythmia();
+        
+        // Novos métodos de detecção
+        detectAtrialFibrillation();
+        detectAtrialFlutter();
+        detectSuperventricularTachycardia();
+        detectVentricularTachycardia();
+        detectVentricularFibrillation();
+        detectWolffParkinsonWhite();
+        detectBrugadaSyndrome();
+        detectQTAbnormalities();
+        detectElectrolyteDisorders();
+        detectWellensPattern();
+        detectOsbornWave();
+        detectEarlyRepolarization();
+        detectEpsilonWave();
+        detectVentricularHypertrophy();
+        detectAtrialOverload();
+        detectSilentIschemia();
+        detectPrinzmetalAngina();
+        detectCoronarySpasm();
+        detectTakotsuboSyndrome();
+        detectPulmonaryEmbolism();
+        detectPulmonaryHypertension();
+        detectChronicLungDisease();
+        detectHypothermia();
+        detectSleepApnea();
+        detectVasovagalSyncope();
+        
         detectAnomalies();
     }
     
@@ -1128,6 +1309,469 @@ public class ECGAnalyzer {
         }
     }
     
+    private void detectAtrialFibrillation() {
+        if (peakIndices.size() < 10) {
+            hasAtrialFibrillation = false;
+            return;
+        }
+        List<Double> intervals = new ArrayList<>();
+        for (int i = 1; i < peakIndices.size(); i++) {
+            intervals.add((double)(peakIndices.get(i) - peakIndices.get(i - 1)));
+        }
+        double meanInterval = intervals.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+        double variance = intervals.stream().mapToDouble(i -> Math.pow(i - meanInterval, 2)).average().orElse(0);
+        double cv = Math.sqrt(variance) / meanInterval;
+        if (cv > 0.3 && bpm > 90) {
+            hasAtrialFibrillation = true;
+            atrialFibrillationDescription = "🔴 Fibrilação Atrial: Ritmo totalmente irregular (CV: " + String.format("%.2f", cv) + ") | Sem ondas P identificáveis | Risco de trombose";
+            isAnomalous = true;
+        } else {
+            hasAtrialFibrillation = false;
+            atrialFibrillationDescription = "";
+        }
+    }
+    
+    private void detectAtrialFlutter() {
+        if (peakIndices.size() < 5) {
+            hasAtrialFlutter = false;
+            return;
+        }
+        double minInterval = peakIndices.stream().mapToInt(i -> i).max().orElse(0) / (double)peakIndices.size();
+        if (bpm > 140 && bpm < 250 && !hasAtrialFibrillation) {
+            hasAtrialFlutter = true;
+            atrialFlutterDescription = "⚠️ Flutter Atrial: Frequência rápida regular (BPM: " + String.format("%.0f", bpm) + ") | Padrão em 'dente de serra' | Risco de comprometimento hemodinâmico";
+            isAnomalous = true;
+        } else {
+            hasAtrialFlutter = false;
+            atrialFlutterDescription = "";
+        }
+    }
+    
+    private void detectSuperventricularTachycardia() {
+        if (bpm > 150 && bpm < 250 && !hasAtrialFlutter && !hasAtrialFibrillation) {
+            hasSuperventricularTachycardia = true;
+            superventricularTachycardiaDescription = "⚠️ Taquicardia Supraventricular: Frequência muito alta (BPM: " + String.format("%.0f", bpm) + ") | Ritmo regular | Pode resolver com manobra vagal";
+            isAnomalous = true;
+        } else {
+            hasSuperventricularTachycardia = false;
+            superventricularTachycardiaDescription = "";
+        }
+    }
+    
+    private void detectVentricularTachycardia() {
+        if (peakIndices.size() < 5 || data.getVoltages().size() < 50) {
+            hasVentricularTachycardia = false;
+            return;
+        }
+        List<Double> intervals = new ArrayList<>();
+        for (int i = 1; i < peakIndices.size(); i++) {
+            intervals.add((double)(peakIndices.get(i) - peakIndices.get(i - 1)));
+        }
+        double meanInterval = intervals.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+        if (bpm > 140 && qrsWidth > 140 && hasInfarction) {
+            hasVentricularTachycardia = true;
+            ventricularTachycardiaDescription = "🔴 TAQUICARDIA VENTRICULAR: Ritmo rápido perigoso (BPM: " + String.format("%.0f", bpm) + ") | QRS alargado (> 140ms) | EMERGÊNCIA MÉDICA";
+            isAnomalous = true;
+        } else {
+            hasVentricularTachycardia = false;
+            ventricularTachycardiaDescription = "";
+        }
+    }
+    
+    private void detectVentricularFibrillation() {
+        List<Double> voltages = data.getVoltages();
+        if (peakIndices.size() < 3 || voltages.size() < 100) {
+            hasVentricularFibrillation = false;
+            return;
+        }
+        double variation = 0;
+        for (int i = 1; i < Math.min(100, voltages.size()); i++) {
+            variation += Math.abs(voltages.get(i) - voltages.get(i - 1));
+        }
+        if (variation > data.getMaxVoltage() * 0.5 && peakIndices.size() < 5 && bpm > 300) {
+            hasVentricularFibrillation = true;
+            ventricularFibrillationDescription = "🔴 FIBRILAÇÃO VENTRICULAR: Ritmo TOTALMENTE CAÓTICO | Sem pulso | PARADA CARDÍACA | REANIMAÇÃO IMEDIATA!";
+            isAnomalous = true;
+        } else {
+            hasVentricularFibrillation = false;
+            ventricularFibrillationDescription = "";
+        }
+    }
+    
+    private void detectWolffParkinsonWhite() {
+        if (prInterval < 100 && qrsWidth > 100) {
+            hasWolffParkinsonWhite = true;
+            wolffParkinsonWhiteDescription = "⚡ Síndrome de Wolff-Parkinson-White (WPW): Intervalo PR curto (" + String.format("%.0f", prInterval) + "ms) | Onda Delta visível | Via acessória extra | Risco de taquicardia";
+            isAnomalous = true;
+        } else {
+            hasWolffParkinsonWhite = false;
+            wolffParkinsonWhiteDescription = "";
+        }
+    }
+    
+    private void detectBrugadaSyndrome() {
+        List<Double> voltages = data.getVoltages();
+        if (peakIndices.size() < 3) {
+            hasBrugadaSyndrome = false;
+            return;
+        }
+        double stElevationV1V2 = 0;
+        for (int i = 0; i < Math.min(50, voltages.size()); i++) {
+            if (i > 5 && i < 15 && voltages.get(i) > data.getMaxVoltage() * 0.6) {
+                stElevationV1V2 += voltages.get(i);
+            }
+        }
+        if (stElevationV1V2 > 2 && qrsWidth < 120) {
+            hasBrugadaSyndrome = true;
+            brugadaSyndromeDescription = "⚠️ Síndrome de Brugada: Elevação ST tipo 1 em precordiais | Mutação genética | Risco de morte súbita | Requer monitoramento";
+            isAnomalous = true;
+        } else {
+            hasBrugadaSyndrome = false;
+            brugadaSyndromeDescription = "";
+        }
+    }
+    
+    private void detectQTAbnormalities() {
+        if (qtInterval > 480) {
+            hasLongQT = true;
+            longQTDescription = "⚠️ Síndrome do QT Longo: Intervalo QT prolongado (" + String.format("%.0f", qtInterval) + "ms) | Risco de Torsades de Pointes | Evitar estimulantes";
+            isAnomalous = true;
+        } else if (qtInterval < 300) {
+            hasShortQT = true;
+            shortQTDescription = "⚠️ Síndrome do QT Curto: Intervalo QT muito curto (" + String.format("%.0f", qtInterval) + "ms) | Risco de arritmias ventriculares | Monitoramento recomendado";
+            isAnomalous = true;
+        } else {
+            hasLongQT = false;
+            hasShortQT = false;
+            longQTDescription = "";
+            shortQTDescription = "";
+        }
+    }
+    
+    private void detectElectrolyteDisorders() {
+        List<Double> voltages = data.getVoltages();
+        if (peakIndices.size() < 3) return;
+        double voltageRange = data.getMaxVoltage() - data.getMinVoltage();
+        
+        // Hipercalemia: ondas T em tenda, QRS alargado
+        if (qrsWidth > 130 && peakIndices.size() > 5) {
+            boolean tWaveTent = false;
+            for (int i = 10; i < Math.min(30, voltages.size()); i++) {
+                if (voltages.get(i) > data.getMaxVoltage() * 0.7) tWaveTent = true;
+            }
+            if (tWaveTent) {
+                hasHyperkalemia = true;
+                hyperkalemiaDescription = "⚠️ Hipercalemia Suspeita: Ondas T em 'tenda' | QRS alargado (> 130ms) | Potássio elevado | URGÊNCIA";
+                isAnomalous = true;
+            }
+        }
+        
+        // Hipocalemia: onda U proeminente, ST deprimido
+        if (stDepression > 0.1 && qtInterval > 440) {
+            hasHypokalemia = true;
+            hypokalemiaDescription = "⚠️ Hipocalemia Suspeita: Onda U proeminente | ST deprimido | Intervalo QT prolongado | Potássio baixo";
+            isAnomalous = true;
+        }
+        
+        // Hipercalcemia: QT encurtado, ST elevado
+        if (qtInterval < 350 && stElevation > 0.3) {
+            hasHypercalcemia = true;
+            hypercalcemiaDescription = "⚠️ Hipercalcemia: QT muito curto (" + String.format("%.0f", qtInterval) + "ms) | ST elevado | Risco de arritmia";
+            isAnomalous = true;
+        }
+        
+        // Hipocalcemia: QT prolongado, padrão especial
+        if (qtInterval > 500) {
+            hasHypocalcemia = true;
+            hypocalcemiaDescription = "⚠️ Hipocalcemia: QT prolongado (" + String.format("%.0f", qtInterval) + "ms) | Risco de convulsões | Cálcio baixo";
+            isAnomalous = true;
+        }
+    }
+    
+    private void detectWellensPattern() {
+        List<Double> voltages = data.getVoltages();
+        if (peakIndices.size() < 3 || voltages.size() < 50) {
+            hasWellensPattern = false;
+            return;
+        }
+        int invertedTCount = 0;
+        for (int i = 1; i < peakIndices.size() - 1; i++) {
+            int peakIdx = peakIndices.get(i);
+            int tStart = peakIdx + 15;
+            if (tStart < voltages.size() && tStart + 10 < voltages.size()) {
+                for (int j = tStart; j < tStart + 10; j++) {
+                    if (voltages.get(j) < -0.2) invertedTCount++;
+                }
+            }
+        }
+        if (invertedTCount > 8 && !hasInfarction) {
+            hasWellensPattern = true;
+            wellensPatternDescription = "⚠️ Padrão de Wellens: Ondas T invertidas simétricas | Marca infarto anterior IMINENTE | Angiografia urgente recomendada";
+            isAnomalous = true;
+        } else {
+            hasWellensPattern = false;
+            wellensPatternDescription = "";
+        }
+    }
+    
+    private void detectOsbornWave() {
+        List<Double> voltages = data.getVoltages();
+        if (peakIndices.size() < 3 || voltages.size() < 30) {
+            hasOsbornWave = false;
+            return;
+        }
+        boolean osbornFound = false;
+        for (int i = 5; i < Math.min(20, voltages.size()); i++) {
+            double voltage = voltages.get(i);
+            if (voltage > data.getMaxVoltage() * 0.5 && i > 0 && voltage > voltages.get(i - 1) && voltage > voltages.get(i + 1)) {
+                osbornFound = true;
+                break;
+            }
+        }
+        if (osbornFound && bpm < 50) {
+            hasOsbornWave = true;
+            osbornWaveDescription = "🔵 Padrão de Osborn: Onda J visível | Bradicardia severa (BPM: " + String.format("%.0f", bpm) + ") | HIPOTERMIA";
+            isAnomalous = true;
+        } else {
+            hasOsbornWave = false;
+            osbornWaveDescription = "";
+        }
+    }
+    
+    private void detectEarlyRepolarization() {
+        List<Double> voltages = data.getVoltages();
+        if (peakIndices.size() < 3) return;
+        boolean earlyRepol = false;
+        double stElevCount = 0;
+        for (int i = 1; i < peakIndices.size() - 1; i++) {
+            int peakIdx = peakIndices.get(i);
+            if (peakIdx + 3 < voltages.size()) {
+                double stValue = voltages.get(peakIdx + 3);
+                if (stValue > 0.1 && stValue < 0.3) stElevCount++;
+            }
+        }
+        if (stElevCount > 2 && stElevation < 0.5) {
+            hasEarlyRepolarization = true;
+            earlyRepolarizationDescription = "🟡 Repolarização Precoce: Elevação ST juvenil simétrica | ST < 0.5mV | Padrão variante normal";
+            isAnomalous = false;
+        } else {
+            hasEarlyRepolarization = false;
+            earlyRepolarizationDescription = "";
+        }
+    }
+    
+    private void detectEpsilonWave() {
+        List<Double> voltages = data.getVoltages();
+        if (peakIndices.size() < 3 || qrsWidth < 110) {
+            hasEpsilonWave = false;
+            return;
+        }
+        int epsilonCount = 0;
+        for (int i = 1; i < peakIndices.size() - 1; i++) {
+            int peakIdx = peakIndices.get(i);
+            int afterPeak = peakIdx + 10;
+            if (afterPeak + 3 < voltages.size()) {
+                double baselineVariation = Math.abs(voltages.get(afterPeak) - voltages.get(afterPeak + 3));
+                if (baselineVariation > 0.05 && baselineVariation < 0.15) epsilonCount++;
+            }
+        }
+        if (epsilonCount > 3) {
+            hasEpsilonWave = true;
+            epsilonWaveDescription = "⚠️ Onda Epsilon: Pequenas deflexões após QRS | Arritmia ventricular de origem direita | Risco de morte súbita";
+            isAnomalous = true;
+        } else {
+            hasEpsilonWave = false;
+            epsilonWaveDescription = "";
+        }
+    }
+    
+    private void detectVentricularHypertrophy() {
+        List<Double> voltages = data.getVoltages();
+        double highVoltageCount = 0;
+        for (double v : voltages) {
+            if (Math.abs(v) > data.getMaxVoltage() * 0.8) highVoltageCount++;
+        }
+        if (qrsWidth > 100 && (highVoltageCount / voltages.size()) > 0.2) {
+            if (qrsWidth > 120) {
+                hasRVH = true;
+                rvhDescription = "⚠️ Hipertrofia Ventricular Direita: Desvio de eixo para direita | QRS alargado | Pressão pulmonar elevada";
+                isAnomalous = true;
+            } else {
+                hasLVH = true;
+                lvhDescription = "⚠️ Hipertrofia Ventricular Esquerda: Voltagens elevadas | Strain pattern | Sobrecarga cardíaca crônica | Risco de morte súbita";
+                isAnomalous = true;
+            }
+        } else {
+            hasLVH = false;
+            hasRVH = false;
+            lvhDescription = "";
+            rvhDescription = "";
+        }
+    }
+    
+    private void detectAtrialOverload() {
+        List<Double> voltages = data.getVoltages();
+        if (peakIndices.size() < 3 || voltages.size() < 50) {
+            hasAtrialOverload = false;
+            return;
+        }
+        boolean beforePeakVariation = false;
+        for (int i = 2; i < peakIndices.size() - 1; i++) {
+            int peakIdx = peakIndices.get(i);
+            if (peakIdx > 15 && peakIdx - 10 >= 0) {
+                double variation = 0;
+                for (int j = peakIdx - 10; j < peakIdx - 5; j++) {
+                    variation += Math.abs(voltages.get(j));
+                }
+                if (variation > data.getMaxVoltage() * 0.3) beforePeakVariation = true;
+            }
+        }
+        if (beforePeakVariation) {
+            hasAtrialOverload = true;
+            atrialOverloadDescription = "⚠️ Sobrecarga Atrial: Ondas P alteradas | Aumento de duração | Pressão atrial elevada";
+            isAnomalous = true;
+        } else {
+            hasAtrialOverload = false;
+            atrialOverloadDescription = "";
+        }
+    }
+    
+    private void detectSilentIschemia() {
+        if (hasInfarction || hasWellensPattern) return;
+        if (stDepression > 0.1) {
+            hasSilentIschemia = true;
+            silentIschemiaDescription = "⚠️ Isquemia Silenciosa: Depressão ST detectada | Sem sintomas | Fluxo coronariano reduzido";
+            isAnomalous = true;
+        } else {
+            hasSilentIschemia = false;
+            silentIschemiaDescription = "";
+        }
+    }
+    
+    private void detectPrinzmetalAngina() {
+        if (stElevation > 0.2 && stElevation < 0.5 && !hasInfarction) {
+            hasPrinzmetalAngina = true;
+            prinzmetalAnginaDescription = "⚠️ Angina de Prinzmetal: Elevação ST transitória (0.2-0.5mV) | Sem ondas Q | Espasmo coronariano | Tende a resolver";
+            isAnomalous = true;
+        } else {
+            hasPrinzmetalAngina = false;
+            prinzmetalAnginaDescription = "";
+        }
+    }
+    
+    private void detectCoronarySpasm() {
+        List<Double> intervals = new ArrayList<>();
+        if (peakIndices.size() < 5) return;
+        for (int i = 1; i < peakIndices.size(); i++) {
+            intervals.add((double)(peakIndices.get(i) - peakIndices.get(i - 1)));
+        }
+        double maxInterval = intervals.stream().mapToDouble(Double::doubleValue).max().orElse(0);
+        double minInterval = intervals.stream().mapToDouble(Double::doubleValue).min().orElse(0);
+        if ((maxInterval - minInterval) / minInterval > 0.4 && stElevation > 0.1) {
+            hasCoronarySpasm = true;
+            coronarySpasmDescription = "⚠️ Espasmo Coronariano: Variação irregular na frequência | Elevação ST variável | Episódico";
+            isAnomalous = true;
+        } else {
+            hasCoronarySpasm = false;
+            coronarySpasmDescription = "";
+        }
+    }
+    
+    private void detectTakotsuboSyndrome() {
+        if (hasInfarction && qrsWidth < 120 && stElevation > 0.5 && infarctionSeverity < 4) {
+            hasTakotsuboSyndrome = true;
+            takotsuboSyndromeDescription = "⚠️ Síndrome de Takotsubo: Padrão pseudo-infarto | Apical ballooning | Gatilho emocional típico | Prognóstico melhor";
+            isAnomalous = true;
+        } else {
+            hasTakotsuboSyndrome = false;
+            takotsuboSyndromeDescription = "";
+        }
+    }
+    
+    private void detectPulmonaryEmbolism() {
+        if (bpm > 120 && qrsWidth < 120) {
+            int s1q3t3Count = 0;
+            // Padrão S1Q3T3 é característico
+            if (stElevation > 0.1 && stDepression > 0.1) s1q3t3Count++;
+            if (s1q3t3Count > 0) {
+                hasPulmonaryEmbolism = true;
+                pulmonaryEmbolismDescription = "🔴 EMBOLIA PULMONAR SUSPEITA: Taquicardia (BPM: " + String.format("%.0f", bpm) + ") | Padrão S1Q3T3 | EMERGÊNCIA VASCULAR";
+                isAnomalous = true;
+            } else {
+                hasPulmonaryEmbolism = false;
+                pulmonaryEmbolismDescription = "";
+            }
+        } else {
+            hasPulmonaryEmbolism = false;
+            pulmonaryEmbolismDescription = "";
+        }
+    }
+    
+    private void detectPulmonaryHypertension() {
+        if (hasRVH && prInterval > 150) {
+            hasPulmonaryHypertension = true;
+            pulmonaryHypertensionDescription = "⚠️ Hipertensão Pulmonar: Hipertrofia RV + Intervalo PR prolongado | Pressão pulmonar elevada | Risco progressivo";
+            isAnomalous = true;
+        } else {
+            hasPulmonaryHypertension = false;
+            pulmonaryHypertensionDescription = "";
+        }
+    }
+    
+    private void detectChronicLungDisease() {
+        if (hasRVH && bpm > 85) {
+            hasChronicLungDisease = true;
+            chronicLungDiseaseDescription = "⚠️ Doença Pulmonar Crônica: Hipertrofia RV + Taquicardia basal | DPOC provável | Cor pulmonale";
+            isAnomalous = true;
+        } else {
+            hasChronicLungDisease = false;
+            chronicLungDiseaseDescription = "";
+        }
+    }
+    
+    private void detectHypothermia() {
+        if (bpm < 40 && hasOsbornWave) {
+            hasHypothermia = true;
+            hypothermiaDescription = "🔵 HIPOTERMIA: Bradicardia severa (BPM: " + String.format("%.0f", bpm) + ") | Onda de Osborn | Temperatura corporal crítica | Reaquecimento necessário";
+            isAnomalous = true;
+        } else {
+            hasHypothermia = false;
+            hypothermiaDescription = "";
+        }
+    }
+    
+    private void detectSleepApnea() {
+        List<Double> intervals = new ArrayList<>();
+        if (peakIndices.size() < 10) return;
+        for (int i = 1; i < peakIndices.size(); i++) {
+            intervals.add((double)(peakIndices.get(i) - peakIndices.get(i - 1)));
+        }
+        int pauseCount = 0;
+        double meanInterval = intervals.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+        for (double interval : intervals) {
+            if (interval > meanInterval * 1.8) pauseCount++;
+        }
+        if (pauseCount > 3 && bpm < 60) {
+            hasSleepApnea = true;
+            sleepApneaDescription = "⚠️ Apneia do Sono Suspeita: Pausas sinusais múltiplas | Bradicardia | Monitoramento noturno recomendado";
+            isAnomalous = true;
+        } else {
+            hasSleepApnea = false;
+            sleepApneaDescription = "";
+        }
+    }
+    
+    private void detectVasovagalSyncope() {
+        if (bpm < 50 && qrsWidth < 100 && !hasInfarction && !hasHypothermia) {
+            hasVasovagalSyncope = true;
+            vasovagalSyncopeDescription = "🟡 Síncope Vasovagal: Bradicardia abrupta | ECG normal | Mecanismo reflexo | Prognóstico bom";
+            isAnomalous = true;
+        } else {
+            hasVasovagalSyncope = false;
+            vasovagalSyncopeDescription = "";
+        }
+    }
+    
     public boolean hasMyocardialScar() {
         return hasMyocardialScar;
     }
@@ -1151,4 +1795,80 @@ public class ECGAnalyzer {
     public String getPostInfarctionArrhythmiaDescription() {
         return postInfarctionArrhythmiaDescription;
     }
+    
+    // Getters para Arritmias
+    public boolean hasAtrialFibrillation() { return hasAtrialFibrillation; }
+    public String getAtrialFibrillationDescription() { return atrialFibrillationDescription; }
+    public boolean hasAtrialFlutter() { return hasAtrialFlutter; }
+    public String getAtrialFlutterDescription() { return atrialFlutterDescription; }
+    public boolean hasSuperventricularTachycardia() { return hasSuperventricularTachycardia; }
+    public String getSuperventricularTachycardiaDescription() { return superventricularTachycardiaDescription; }
+    public boolean hasVentricularTachycardia() { return hasVentricularTachycardia; }
+    public String getVentricularTachycardiaDescription() { return ventricularTachycardiaDescription; }
+    public boolean hasVentricularFibrillation() { return hasVentricularFibrillation; }
+    public String getVentricularFibrillationDescription() { return ventricularFibrillationDescription; }
+    public boolean hasEctopicBeats() { return hasEctopicBeats; }
+    public String getEctopicBeatsDescription() { return ectopicBeatsDescription; }
+    
+    // Getters para Síndromes Congênitas
+    public boolean hasWolffParkinsonWhite() { return hasWolffParkinsonWhite; }
+    public String getWolffParkinsonWhiteDescription() { return wolffParkinsonWhiteDescription; }
+    public boolean hasBrugadaSyndrome() { return hasBrugadaSyndrome; }
+    public String getBrugadaSyndromeDescription() { return brugadaSyndromeDescription; }
+    public boolean hasLongQT() { return hasLongQT; }
+    public String getLongQTDescription() { return longQTDescription; }
+    public boolean hasShortQT() { return hasShortQT; }
+    public String getShortQTDescription() { return shortQTDescription; }
+    
+    // Getters para Desordens de Eletrólito
+    public boolean hasHyperkalemia() { return hasHyperkalemia; }
+    public String getHyperkalemiaDescription() { return hyperkalemiaDescription; }
+    public boolean hasHypokalemia() { return hasHypokalemia; }
+    public String getHypokalemiaDescription() { return hypokalemiaDescription; }
+    public boolean hasHypercalcemia() { return hasHypercalcemia; }
+    public String getHypercalcemiaDescription() { return hypercalcemiaDescription; }
+    public boolean hasHypocalcemia() { return hasHypocalcemia; }
+    public String getHypocalcemiaDescription() { return hypocalcemiaDescription; }
+    
+    // Getters para Padrões Especiais
+    public boolean hasWellensPattern() { return hasWellensPattern; }
+    public String getWellensPatternDescription() { return wellensPatternDescription; }
+    public boolean hasOsbornWave() { return hasOsbornWave; }
+    public String getOsbornWaveDescription() { return osbornWaveDescription; }
+    public boolean hasEarlyRepolarization() { return hasEarlyRepolarization; }
+    public String getEarlyRepolarizationDescription() { return earlyRepolarizationDescription; }
+    public boolean hasEpsilonWave() { return hasEpsilonWave; }
+    public String getEpsilonWaveDescription() { return epsilonWaveDescription; }
+    
+    // Getters para Hipertrofias
+    public boolean hasLVH() { return hasLVH; }
+    public String getLVHDescription() { return lvhDescription; }
+    public boolean hasRVH() { return hasRVH; }
+    public String getRVHDescription() { return rvhDescription; }
+    public boolean hasAtrialOverload() { return hasAtrialOverload; }
+    public String getAtrialOverloadDescription() { return atrialOverloadDescription; }
+    
+    // Getters para Isquemias
+    public boolean hasSilentIschemia() { return hasSilentIschemia; }
+    public String getSilentIschemiaDescription() { return silentIschemiaDescription; }
+    public boolean hasPrinzmetalAngina() { return hasPrinzmetalAngina; }
+    public String getPrinzmetalAnginaDescription() { return prinzmetalAnginaDescription; }
+    public boolean hasCoronarySpasm() { return hasCoronarySpasm; }
+    public String getCoronarySpasmDescription() { return coronarySpasmDescription; }
+    public boolean hasTakotsuboSyndrome() { return hasTakotsuboSyndrome; }
+    public String getTakotsuboSyndromeDescription() { return takotsuboSyndromeDescription; }
+    
+    // Getters para Outras Condições
+    public boolean hasPulmonaryEmbolism() { return hasPulmonaryEmbolism; }
+    public String getPulmonaryEmbolismDescription() { return pulmonaryEmbolismDescription; }
+    public boolean hasPulmonaryHypertension() { return hasPulmonaryHypertension; }
+    public String getPulmonaryHypertensionDescription() { return pulmonaryHypertensionDescription; }
+    public boolean hasChronicLungDisease() { return hasChronicLungDisease; }
+    public String getChronicLungDiseaseDescription() { return chronicLungDiseaseDescription; }
+    public boolean hasHypothermia() { return hasHypothermia; }
+    public String getHypothermiaDescription() { return hypothermiaDescription; }
+    public boolean hasSleepApnea() { return hasSleepApnea; }
+    public String getSleepApneaDescription() { return sleepApneaDescription; }
+    public boolean hasVasovagalSyncope() { return hasVasovagalSyncope; }
+    public String getVasovagalSyncopeDescription() { return vasovagalSyncopeDescription; }
 }
