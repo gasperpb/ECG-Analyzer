@@ -317,6 +317,18 @@ public class ECGController {
             document.add(dateTime);
             document.add(new Paragraph("\n"));
             
+            // Seção: Informações do Sistema
+            Paragraph systemInfoTitle = new Paragraph("INFORMAÇÕES DO SISTEMA ECG ANALYZER")
+                .setFont(PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD))
+                .setFontSize(11);
+            document.add(systemInfoTitle);
+            
+            Paragraph systemInfo = new Paragraph("📊 52 Diagnósticos organizados em 14 categorias clínicas")
+                .setFont(PdfFontFactory.createFont(StandardFonts.HELVETICA))
+                .setFontSize(10);
+            document.add(systemInfo);
+            document.add(new Paragraph("\n"));
+            
             // Seção: Estatísticas Básicas
             Paragraph statsTitle = new Paragraph("1. ESTATÍSTICAS DO SINAL")
                 .setFont(PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD))
