@@ -14,6 +14,59 @@ Um sistema Java completo para leitura, análise e visualização de dados de **E
 - ✅ **Dados Simulados** para teste sem arquivo
 - ✅ **Relatório Detalhado** com análise completa
 
+## 🏥 Condições Clínicas Detectadas (45+ Diagnósticos)
+
+### 1. Anomalias Básicas
+- Anomalias gerais | BPM (Taquicardia, Bradicardia)
+
+### 2. Infartos e Isquemias ❤️
+- Infarto do Miocárdio | Isquemia Silenciosa | Angina de Prinzmetal
+- Espasmo Coronariano | Síndrome de Takotsubo
+
+### 3. Desordens de Condução ⚡
+- Bloqueio de Ramo (RBBB, LBBB) | Bloqueio AV (1º, 2º, 3º grau)
+- Intervalos PR prolongados | QRS alargado
+
+### 4. Arritmias
+- Fibrilação Atrial | Flutter Atrial | Taquicardia Supraventricular
+- Taquicardia Ventricular | Fibrilação Ventricular | Batidas Ectópicas
+
+### 5. Síndromes Congênitas
+- Síndrome de Wolff-Parkinson-White (WPW) | Síndrome de Brugada
+- QT Longo | QT Curto
+
+### 6. Desordens de Eletrólitos ⚗️
+- Hipercalemia (potássio alto) | Hipocalemia (potássio baixo)
+- Hipercalcemia (cálcio alto) | Hipocalcemia (cálcio baixo)
+
+### 7. Padrões Especiais
+- Padrão de Wellens | Onda de Osborn | Repolarização Precoce | Onda Épsilon
+
+### 8. Hipertrofias
+- Hipertrofia Ventricular Esquerda (LVH) | Hipertrofia Ventricular Direita (RVH)
+- Sobrecarga Atrial
+
+### 9. Inflamação e Pericardite 🫀
+- Miocardite | Pericardite
+
+### 10. Efeitos de Drogas 💊
+- Efeitos de medicamentos (Digoxina, etc) | Padrões de intoxicação
+
+### 11. Lesões Pós-Infarto
+- Cicatriz Miocárdica | Aneurisma Ventricular | Arritmias Pós-Infarto
+
+### 12. Condições Pulmonares e Vasculares 🫁
+- **Embolia Pulmonar** - Alterações súbitas no eixo elétrico do coração
+- **Hipertensão Pulmonar** - Hipertrofia RV + Intervalo PR prolongado
+- **DPOC/Enfisema** - Sinais de sobrecarga crônica devido à dificuldade de bombear sangue
+
+### 13. Outras Condições
+- Hipotermia (com Onda de Osborn) | Apneia do Sono | Síncope Vasovagal
+
+### 14. Alterações Metabólicas e Hormonais 🆕
+- **Hipotireoidismo** - Bradicardia + Diminuição da voltagem das ondas + Ritmo muito lento
+- **Hipertireoidismo** - Taquicardia + Taquicardias ou arritmias como fibrilação atrial
+
 ## 📁 Estrutura do Projeto
 
 ```
