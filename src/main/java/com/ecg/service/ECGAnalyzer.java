@@ -115,6 +115,12 @@ public class ECGAnalyzer {
     private boolean hasVasovagalSyncope;
     private String vasovagalSyncopeDescription;
     
+    // Alterações Metabólicas e Hormonais
+    private boolean hasHypothyroidism;
+    private String hypothyroidismDescription;
+    private boolean hasHyperthyroidism;
+    private String hyperthyroidismDescription;
+    
     public ECGAnalyzer(ECGData data) {
         this.data = data;
         this.peakIndices = new ArrayList<>();
@@ -222,6 +228,12 @@ public class ECGAnalyzer {
         this.hasVasovagalSyncope = false;
         this.vasovagalSyncopeDescription = "";
         
+        // Alterações Metabólicas e Hormonais
+        this.hasHypothyroidism = false;
+        this.hypothyroidismDescription = "";
+        this.hasHyperthyroidism = false;
+        this.hyperthyroidismDescription = "";
+        
         analyze();
     }
     
@@ -266,6 +278,8 @@ public class ECGAnalyzer {
         detectHypothermia();
         detectSleepApnea();
         detectVasovagalSyncope();
+        detectHypothyroidism();
+        detectHyperthyroidism();
         
         detectAnomalies();
     }
@@ -1695,7 +1709,8 @@ public class ECGAnalyzer {
             if (stElevation > 0.1 && stDepression > 0.1) s1q3t3Count++;
             if (s1q3t3Count > 0) {
                 hasPulmonaryEmbolism = true;
-                pulmonaryEmbolismDescription = "🔴 EMBOLIA PULMONAR SUSPEITA: Taquicardia (BPM: " + String.format("%.0f", bpm) + ") | Padrão S1Q3T3 | EMERGÊNCIA VASCULAR";
+                pulmonaryEmbolismDescription = "🔴 EMBOLIA PULMONAR SUSPEITA: Taquicardia (BPM: " + String.format("%.0f", bpm) + ") | Padrão S1Q3T3 | " +
+                    "Alterações súbitas no eixo elétrico do coração | EMERGÊNCIA VASCULAR";
                 isAnomalous = true;
             } else {
                 hasPulmonaryEmbolism = false;
@@ -1721,7 +1736,8 @@ public class ECGAnalyzer {
     private void detectChronicLungDisease() {
         if (hasRVH && bpm > 85) {
             hasChronicLungDisease = true;
-            chronicLungDiseaseDescription = "⚠️ Doença Pulmonar Crônica: Hipertrofia RV + Taquicardia basal | DPOC provável | Cor pulmonale";
+            chronicLungDiseaseDescription = "⚠️ DPOC ou Enfisema: Hipertrofia RV + Taquicardia basal | " +
+                "Sinais de sobrecarga crônica devido à dificuldade de bombear sangue pelos pulmões | Cor pulmonale";
             isAnomalous = true;
         } else {
             hasChronicLungDisease = false;
@@ -1769,6 +1785,30 @@ public class ECGAnalyzer {
         } else {
             hasVasovagalSyncope = false;
             vasovagalSyncopeDescription = "";
+        }
+    }
+    
+    private void detectHypothyroidism() {
+        if (bpm < 60 && stElevation < 0.05 && data.getMaxVoltage() < 1.0) {
+            hasHypothyroidism = true;
+            hypothyroidismDescription = "🔵 HIPOTIREOIDISMO SUSPEITO: Bradicardia (BPM: " + String.format("%.0f", bpm) + ") | " +
+                "Diminuição da voltagem das ondas | Ritmo muito lento | Considerar testes de TSH";
+            isAnomalous = true;
+        } else {
+            hasHypothyroidism = false;
+            hypothyroidismDescription = "";
+        }
+    }
+    
+    private void detectHyperthyroidism() {
+        if (bpm > 100 && (hasAtrialFibrillation || hasSuperventricularTachycardia)) {
+            hasHyperthyroidism = true;
+            hyperthyroidismDescription = "🔴 HIPERTIREOIDISMO SUSPEITO: Taquicardia (BPM: " + String.format("%.0f", bpm) + ") | " +
+                "Frequentemente causa taquicardias ou arritmias como fibrilação atrial | Considerar testes de TSH";
+            isAnomalous = true;
+        } else {
+            hasHyperthyroidism = false;
+            hyperthyroidismDescription = "";
         }
     }
     
@@ -1871,4 +1911,10 @@ public class ECGAnalyzer {
     public String getSleepApneaDescription() { return sleepApneaDescription; }
     public boolean hasVasovagalSyncope() { return hasVasovagalSyncope; }
     public String getVasovagalSyncopeDescription() { return vasovagalSyncopeDescription; }
+    
+    // Getters para Alterações Metabólicas e Hormonais
+    public boolean hasHypothyroidism() { return hasHypothyroidism; }
+    public String getHypothyroidismDescription() { return hypothyroidismDescription; }
+    public boolean hasHyperthyroidism() { return hasHyperthyroidism; }
+    public String getHyperthyroidismDescription() { return hyperthyroidismDescription; }
 }
